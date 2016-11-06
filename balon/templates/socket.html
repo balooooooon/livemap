@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SocketIO</title>
+	<script type="text/javascript" src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript" src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
+	<script type="text/javascript" charset="utf-8">
+	$(document).ready(function () {
+		console.log("connect: "+ 'http://' + document.domain + ':' + location.port + "/socket/");
+        var socket = io.connect('http://' + document.domain + ':' + location.port + "/socket/");
+        socket.on('connect', function() {
+        	console.log("connected");
+            socket.emit('my_event');
+        });
+        socket.on('message', function(data) {
+            console.log("Socket data received: " + data.data);
+        });
+	})
+        
+    </script>
+
+</head>
+
+<body>
+
+<h1>Socket Test. Look to console.</h1>
+
+</body>
+</html>

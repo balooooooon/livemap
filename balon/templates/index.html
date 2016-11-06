@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="{{ styleURL }}">
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript" src="{{ socketioURL }}"></script>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+    
+    <script>
+
+    var iconsLocation = "https://floating-sands-77952.herokuapp.com/static/";
+    var icons = {
+      baloon: iconsLocation + "airballoon.png",
+      burst: iconsLocation + "explosion.png",
+      start: iconsLocation + "launched-rocket.png"
+    }
+
+    var coords;
+    var map;
+    var path;
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 48.847665, lng: 19.518096},
+        zoom: 8
+      });
+
+      coords = [
+
+        {lat: 48.649259, lng:19.358272},
+        {lat: 48.755356, lng:19.581007},
+        {lat: 48.687088, lng:19.667122},
+        {lat: 48.789562, lng:19.773012}
+      ];
+
+      path = new google.maps.Polyline({
+        path: coords,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+      })
+
+      var baloonPosition = new google.maps.LatLng(48.789562, 19.773012);
+
+      var baloonMarker = new google.maps.Marker({
+        position: baloonPosition,
+        icon: icons.baloon,
+        map: map
+      });
+
+      var burstPosition = new google.maps.LatLng(48.755356, 19.581007);
+      var burstMarker = new google.maps.Marker({
+        position: burstPosition,
+        icon: icons.burst,
+        map: map
+      });
+
+      var startPosition = new google.maps.LatLng(48.649259, 19.358272);
+      var startMarker = new google.maps.Marker({
+        position: startPosition,
+        icon: icons.start,
+        map: map
+      });
+
+      path.setMap(map);
+    }
+
+    $(document).ready(function () {
+      var socketURL = 'https://' + document.domain + ':' + location.port + "/map";
+      console.log("connect to : " + socketURL);
+      /*
+      io.configure(function () {
+        io.set('match origin protocol', true);
+      });
+      */
+      var socket = io.connect(socketURL);
+
+      socket.on('connect', function() {
+        console.log("connected");
+          socket.emit('my_event');
+      });
+      
+      socket.on('message', function(data) {
+        console.log("Message from Socket: " + data.data);
+      });
+
+      socket.on('baloon_update', function(data) {
+
+          console.log("Socket data received: " + data);
+          
+          var message = JSON.parse(data);
+
+          switch(message.type) {
+            case "baloonLocation":
+              console.log("baloonLocation");
+              console.log("New location: X:" + message.location.x + " Y: " + message.location.y);
+              var newCoords =  new google.maps.LatLng(message.location.x, message.location.y);
+              console.log(newCoords);
+              var baloonPath = path.getPath();
+              baloonPath.push(newCoords);
+              console.log(baloonPath);
+              break;
+            case "baloonStart":
+              console.log("baloonStart");
+              break;
+            case "baloonBurst":
+              console.log("baloonBurst");
+              break;
+            case "balooonLanding":
+              console.log("balooonLanding");
+              break;
+            case "baloonPathUpdate":
+              console.log("baloonPathUpdate");
+              break;
+          }
+
+      });
+    })
+
+    </script>
+
+  </head>
+  <body>
+  <div id="mapWrapper">
+  	<div id="map"></div>
+    
+    <!-- 48.847665, 19.518096 
+
+    48.649259, 19.358272
+    48.755356, 19.581007
+    48.687088, 19.667122
+    48.789562, 19.773012
+    48.896142, 19.950064
+
+
+    -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCty_vzd_RYvE-x6_UdRx8Zl8owLlWh3ng&callback=initMap"
+    async defer></script>
+  </div>
+  <div id="sidePanelWrapper">
+
+    <div class="telemetry-card mdl-card mdl-shadow--2dp">
+      <div class="mdl-card__title">
+        <h2>Informácie o našej sonde</h2>
+      </div>
+    </div>
+
+    <div class="telemetry-card mdl-card mdl-shadow--2dp">
+      <div class="mdl-card__title">
+        <h4>Aktuálna pozícia:</h4></br>
+        <h4>18.4323 W, 40.1233 N</h4></br>
+      </div>
+    </div>
+
+    <div class="telemetry-card mdl-card mdl-shadow--2dp">
+      <div class="mdl-card__title">
+        <h4>Výška:</h4></br>
+        <h4>12345m</h4></br>
+      </div>
+    </div>
+
+    <div class="telemetry-card mdl-card mdl-shadow--2dp">
+      <div class="mdl-card__title">
+        <h4>Teplota:</h4></br>
+        <h4>-23.0 °C</h4></br>
+      </div>
+    </div>
+
+  	<div class="telemetry-card mdl-card mdl-shadow--2dp">
+  		<div class="md1-card__title">
+        <h1>Facebook Feed? maybe</h1>
+      </div>
+  	</div>
+  </div>
+    
+  </body>
+</html

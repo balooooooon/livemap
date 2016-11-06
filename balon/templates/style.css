@@ -1,0 +1,41 @@
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#mapWrapper{
+	height: 100%;
+	width: 100%;
+	position: absolute;
+}
+
+#sidePanelWrapper {
+	float: right;
+    width: 18%;
+    min-width: 300px;
+    padding: 1% 1%;
+}
+
+/*
+#sidePanelWrapper > div {
+	border: solid blue 1px;
+}
+*/
+
+#sidePanelWrapper > div:last-child {
+	margin-top: 10px;
+}
+
+.telemetry-card {
+	width: 100% !important;
+	margin-bottom: 15px;
+}
+
+#map {
+	height: 100%;
+}
+
+.parameterWrap p{
+	color: #008ed6;
+}
