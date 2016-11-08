@@ -1,0 +1,78 @@
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#mapWrapper{
+	height: 100%;
+	width: 100%;
+	position: absolute;
+}
+
+@media screen and (max-width: 720px) {
+	#sidePanelWrapper {
+		display: none;
+	}
+
+}
+
+#sidePanelWrapper {
+	float: right;
+    width: 18%;
+    min-width: 300px;
+    padding: 1% 1%;
+	font-family: 'Roboto', sans-serif !important;
+
+}
+
+/*
+#sidePanelWrapper > div {
+	border: solid blue 1px;
+}
+*/
+
+#sidePanelWrapper > div:last-child {
+	margin-top: 10px;
+}
+
+.telemetry-card {
+	width: 100% !important;
+	margin-bottom: 15px;
+}
+
+.telemetry-card p {
+	margin: 0px;
+}
+
+#map {
+	height: 100%;
+}
+
+.mdl-card__title {
+	background-color: #81D4FA !important;
+}
+
+.mdl-card__title > h4 {
+	margin: 10px 0 10px 0;
+	font-weight: 300;
+}
+
+.md1-card__supporting-text {
+	padding: 16px;
+}
+
+.md1-card__supporting-text > p {
+	font-size: 20px;
+	margin: 0;
+}
+
+.mdl-card__actions > p{
+	font-weight: 300;
+    font-size: 0.8em;
+    padding: 0 8px;
+}
+
+.telemetry-card {
+	min-height: 150px !important;
+}

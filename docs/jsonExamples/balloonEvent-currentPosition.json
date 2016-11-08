@@ -1,0 +1,17 @@
+{
+	"type": "balloonEvent",
+	"created": 1477866660,
+  "data": {
+  	"type": "currentPosition",
+		"eventTime": 1477866660,
+    "point": {
+      "time": 1477866660, 
+      "lat": 49.000000,
+      "lng": 19.100000
+    },
+    "info": { 
+      "title": "Balloon burst",
+      "text": "Our balloon had bursted ..."
+    }
+  }
+}

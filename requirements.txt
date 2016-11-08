@@ -1,0 +1,20 @@
+# ----------------------
+# Flask
+# ----------------------
+flask
+flask_socketio
+flask_sqlalchemy
+
+
+# ----------------------
+# Testing
+# ----------------------
+# mock
+
+
+# ----------------------
+# Production Server
+# ----------------------
+
+# Using Apache with mod_wsgi instead
+# gunicorn
