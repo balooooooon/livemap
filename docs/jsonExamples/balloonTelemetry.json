@@ -1,0 +1,18 @@
+{
+	"type": "balloonTelemetry",
+	"created": 1477866660,
+  "data": {
+  	"parameters": [
+      {
+        "type": "altitude",
+        "time": 1477866660,
+        "value": 12000
+      },
+      {
+        "type": "temperature",
+        "time": 1477866660,
+        "value": -23
+      }
+    ]
+  }
+}

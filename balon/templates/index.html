@@ -1,79 +1,138 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Simple Map</title>
+    <title>Live map</title>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="{{ styleURL }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
 
-    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-    <script type="text/javascript" src="{{ socketioURL }}"></script>
+    <!-- FONTS -->
 
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700" >
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    <!-- Material design Lite + Colorscheme(Indigo,Pink) -->
+    <!-- https://getmdl.io/started/index.html -->
+
     <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
     <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
     
+    <!-- JAVASCRIPT -->
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename = 'js/lib/socket.io-1.4.5.js') }}"></script>
+    
+    <script type="text/javascript" src="{{ url_for('static',filename='js/mapHelper.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/sockets.js') }}"></script>
+    
     <script>
 
-    var iconsLocation = "https://floating-sands-77952.herokuapp.com/static/";
+    var balloonData = JSON.parse('{{balloon_data|tojson}}');
+    console.log("Debug Values:");
+    console.log(balloonData);
+
     var icons = {
-      baloon: iconsLocation + "airballoon.png",
-      burst: iconsLocation + "explosion.png",
-      start: iconsLocation + "launched-rocket.png"
+      balloon: "{{ url_for('static',filename='img/airballoon.png') }}",
+      burst: "{{ url_for('static',filename='img/explosion.png') }}",
+      start: "{{ url_for('static',filename='img/launched-rocket.png') }}"
     }
 
-    var coords;
     var map;
+    
     var path;
+    var pathPredicted;
+    
+    var startPosition;
+    var startMarker;
+    
+    var balloonPosition;
+    var balloonMarker;
+    
+    var burstPosition;
+    var burstMarker;
+
+    var landingPosition;
+    var landingMarker;
+
     function initMap() {
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 48.847665, lng: 19.518096},
-        zoom: 8
-      });
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 48.847665, lng: 19.518096},
+          zoom: 8,
+          zoomControl: true,
+          zoomControlOptions: {
+            position: google.maps.ControlPosition.LEFT_BOTTOM
+          },
+          streetViewControl: false,
+          scaleControl: false,
+          scaleControlOptions: {
+            position: google.maps.ControlPosition.BOTTOM_LEFT
+          }
+        });
 
-      coords = [
+        balloonMarker = new google.maps.Marker({
+          icon: icons.balloon,
+          map: map
+        })
 
-        {lat: 48.649259, lng:19.358272},
-        {lat: 48.755356, lng:19.581007},
-        {lat: 48.687088, lng:19.667122},
-        {lat: 48.789562, lng:19.773012}
-      ];
+        burstMarker = new google.maps.Marker({
+          icon: icons.burst,
+          map: map
+        })
+        
+        startMarker = new google.maps.Marker({
+          icon: icons.start,
+          map: map
+        })
 
-      path = new google.maps.Polyline({
-        path: coords,
-        geodesic: true,
-        strokeColor: '#FF0000',
-        strokeOpacity: 1.0,
-        strokeWeight: 2
-      })
+        landingMarker = new google.maps.Marker({
+          map: map
+        })
 
-      var baloonPosition = new google.maps.LatLng(48.789562, 19.773012);
+        path = new google.maps.Polyline({
+          geodesic: true,
+          strokeColor: '#FF0000',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        })
 
-      var baloonMarker = new google.maps.Marker({
-        position: baloonPosition,
-        icon: icons.baloon,
-        map: map
-      });
+        pathPredicted = new google.maps.Polyline({
+          geodesic: true,
+          strokeColor: '#0000FF',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        })
+        
+        if( "location" in balloonData ) {
+          balloonPosition = setMarkerPosition(balloonPosition,balloonMarker,balloonData.location.point,null);
+        }
 
-      var burstPosition = new google.maps.LatLng(48.755356, 19.581007);
-      var burstMarker = new google.maps.Marker({
-        position: burstPosition,
-        icon: icons.burst,
-        map: map
-      });
+        if( "burst" in balloonData ) {
+          burstPosition = setMarkerPosition(burstPosition,burstMarker,balloonData.burst.point,null);
+        }
 
-      var startPosition = new google.maps.LatLng(48.649259, 19.358272);
-      var startMarker = new google.maps.Marker({
-        position: startPosition,
-        icon: icons.start,
-        map: map
-      });
+        if( "start" in balloonData ) {
+          startPosition = setMarkerPosition(startPosition,startMarker,balloonData.start.point,null);
+        }
 
-      path.setMap(map);
-    }
+        if( "landing" in balloonData ) {
+          landingPosition = setMarkerPosition(landingPosition,landingMarker,balloonData.landing.point,null);
+        }
+
+        path.setMap(map);
+
+        pathPredicted.setMap(map);
+
+        if( "path" in balloonData ) {
+          setPath(path,balloonData.path.data.points,"new");
+        }
+
+        if( "predictedPath" in balloonData ) {
+          setPath(pathPredicted,balloonData.predictedPath);
+        }
+      }
 
     $(document).ready(function () {
-      var socketURL = 'https://' + document.domain + ':' + location.port + "/map";
+      var socketURL = 'http://' + document.domain + ':' + location.port + "/map";
       console.log("connect to : " + socketURL);
       /*
       io.configure(function () {
@@ -83,7 +142,7 @@
       var socket = io.connect(socketURL);
 
       socket.on('connect', function() {
-        console.log("connected");
+        console.log("connected")
           socket.emit('my_event');
       });
       
@@ -93,34 +152,27 @@
 
       socket.on('baloon_update', function(data) {
 
-          console.log("Socket data received: " + data);
+          console.log("Socket data received: ", data);
           
           var message = JSON.parse(data);
 
+          console.log("JSON message: ", message);
+
+          console.log("Message type: ", message.type);
           switch(message.type) {
-            case "baloonLocation":
-              console.log("baloonLocation");
-              console.log("New location: X:" + message.location.x + " Y: " + message.location.y);
-              var newCoords =  new google.maps.LatLng(message.location.x, message.location.y);
-              console.log(newCoords);
-              var baloonPath = path.getPath();
-              baloonPath.push(newCoords);
-              console.log(baloonPath);
+            case "balloonEvent":
+              console.log("Event: ", message.data.type);
+              handleBalloonEvent(message);
               break;
-            case "baloonStart":
-              console.log("baloonStart");
+            case "balloonPath":
+              console.log("Path: ", message.data.type);
+              handlePathUpdate(message);
               break;
-            case "baloonBurst":
-              console.log("baloonBurst");
-              break;
-            case "balooonLanding":
-              console.log("balooonLanding");
-              break;
-            case "baloonPathUpdate":
-              console.log("baloonPathUpdate");
+            case "balloonTelemetry":
+              console.log("Telemetry");
+              handleTelemetryUpdate(message);
               break;
           }
-
       });
     })
 
@@ -129,18 +181,7 @@
   </head>
   <body>
   <div id="mapWrapper">
-  	<div id="map"></div>
-    
-    <!-- 48.847665, 19.518096 
-
-    48.649259, 19.358272
-    48.755356, 19.581007
-    48.687088, 19.667122
-    48.789562, 19.773012
-    48.896142, 19.950064
-
-
-    -->
+  	<div id="map"><!-- Here comes the map --></div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCty_vzd_RYvE-x6_UdRx8Zl8owLlWh3ng&callback=initMap"
     async defer></script>
   </div>
@@ -148,34 +189,52 @@
 
     <div class="telemetry-card mdl-card mdl-shadow--2dp">
       <div class="mdl-card__title">
-        <h2>Informácie o našej sonde</h2>
+        <h2>FIIT Sonda</h2>
+      </div>
+      <div class="mdl-card__title">
+        <h2 class="mdl-card__title-text">Status: <b style="margin: 0 5px"> N/A</b></h2>
       </div>
     </div>
 
     <div class="telemetry-card mdl-card mdl-shadow--2dp">
       <div class="mdl-card__title">
-        <h4>Aktuálna pozícia:</h4></br>
-        <h4>18.4323 W, 40.1233 N</h4></br>
+        <h2 class="mdl-card__title-text">Aktuálna pozícia:</h2>
+      </div>
+      <div class="md1-card__supporting-text">
+        <p class="telemetry-parameter position">18.4323 W, 40.1233 N</p>
+      </div>
+      <div class="mdl-card__actions mdl-card--border">
+        <p class="telemetry-parameter position time">20.10.2016 14:54:23</p>
       </div>
     </div>
 
     <div class="telemetry-card mdl-card mdl-shadow--2dp">
       <div class="mdl-card__title">
-        <h4>Výška:</h4></br>
-        <h4>12345m</h4></br>
+        <h2 class="mdl-card__title-text">Výška:</h2>
+      </div>
+      <div class="md1-card__supporting-text">
+        <p class="telemetry-parameter altitude">0 m</p>
+      </div>
+      <div class="mdl-card__actions mdl-card--border">
+        <p class="telemetry-parameter altitude time">20.10.2016 14:54:23</p>
       </div>
     </div>
 
     <div class="telemetry-card mdl-card mdl-shadow--2dp">
       <div class="mdl-card__title">
-        <h4>Teplota:</h4></br>
-        <h4>-23.0 °C</h4></br>
+        <h2 class="mdl-card__title-text">Teplota:</h2>
+      </div>
+      <div class="md1-card__supporting-text">
+        <p class="telemetry-parameter temperature">0 °C</p>
+      </div>
+      <div class="mdl-card__actions mdl-card--border">
+        <p class="telemetry-parameter temperature time">20.10.2016 14:54:23</p>
       </div>
     </div>
 
-  	<div class="telemetry-card mdl-card mdl-shadow--2dp">
-  		<div class="md1-card__title">
-        <h1>Facebook Feed? maybe</h1>
+  	<div class="telemetry-card mdl-card mdl-shadow--2dp" style="display:none">
+  		<div class="mdl-card__title">
+        <h4>Facebook Feed</h4>
       </div>
   	</div>
   </div>
