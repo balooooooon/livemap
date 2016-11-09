@@ -4,7 +4,7 @@
 
 # import BalloonService
 
-app = None
+from balon import app
 
 # BalloonService.app = app
 

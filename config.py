@@ -1,5 +1,5 @@
-# import os
-# basedir = os.path.abspath(os.path.dirname(__file__))
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config(object):
@@ -7,12 +7,11 @@ class Config(object):
     TESTING = False
     CSRF_ENABLED = True
     SECRET_KEY = 'this-really-needs-to-be-changed'
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////balloonDb_dev.sqlite3'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////users.sqlite3'
 
 
 class ProductionConfig(Config):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////balloonDb.sqlite3'
     #SQLALCHEMY_DATABASE_URI = 'sqlite:////users.sqlite3'
 
 
@@ -28,4 +27,3 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////balloonDb_test.sqlite3'
