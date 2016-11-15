@@ -113,6 +113,10 @@ def api_dumbjson():
         socketio.emit("baloon_update", json_request, namespace="/map")
         return "Data sent."
 
+@app.route('/api/mirror', methods=['POST'])
+def api_mirror():
+    if request.method == 'POST':
+        return jsonify(request.get_json(force=False, silent=False, cache=False)), 202
 
 # -------- SOCKETS ---------
 
