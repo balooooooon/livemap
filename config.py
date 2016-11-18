@@ -27,6 +27,8 @@ class ProductionConfig(Config):
     LOGGING_LOCATION = "/var/log/flask/balon.log"
     LOGGING_LEVEL = logging.WARNING
 
+    APP_AUTHENTICATE_FLIGHT = True
+
 
 class StagingConfig(Config):
     DEVELOPMENT = True
@@ -37,6 +39,8 @@ class DevelopmentConfig(Config):
     DEVELOPMENT = True
     DEBUG = True
     NO_DB = True
+
+    APP_AUTHENTICATE_FLIGHT = False
 
 class TestingConfig(Config):
     TESTING = True

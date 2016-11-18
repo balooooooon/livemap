@@ -1,16 +1,15 @@
 # ----------------- IMPORTS -----------------
 
 # Flask imports
-from flask import Flask, render_template, request, url_for, current_app
+from flask import Flask, render_template, request, url_for, current_app, jsonify, abort
 from flask_socketio import SocketIO, emit
-from flask_sqlalchemy import SQLAlchemy
 
-import random
 import json
 
 # Controller
-from controller import Controller
+from balon.controller import Controller, WebController
 from balon import app, socketio
+
 # ----------------- IMPORTS -----------------
 
 print "Current_app"
@@ -68,44 +67,6 @@ def balloonDashboard():
 
 # ------ API -------
 
-def authenticate(auth_hash):
-    # TODO
-    return False
-
-# Deprecated
-@app.route('/api/update', methods=['POST'])
-def api_update():
-    if request.method == 'POST':
-        print("POST request")
-        json_request = request.get_json(force=False, silent=False, cache=False)
-        # TODO Not a JSON Exception
-
-        if json_request.has_key("pass"):
-            print "Has key"
-            auth_hash = json_request["pass"]
-            authenticated = authenticate(auth_hash)
-            if (not authenticated):
-                print "Not authenticated."
-                return "Not authenticated.", 401
-        else:
-            print "Not authenticated."
-            return "Not authenticated.", 401
-
-        if json_request["type"] == "updateLocation":
-            data = {}
-            data["type"] = "baloonLocation"
-            data["timestamp"] = json_request["data"]["timestamp"]
-            data["location"] = {}
-            data["location"]["lat"] = json_request["data"]["location"]["lat"]
-            data["location"]["lng"] = json_request["data"]["location"]["lng"]
-            json_data = json.dumps(data)
-            socketio.emit("baloon_update", json_data, namespace="/map")
-            return "Data updated."
-    else:
-        print("GET request")
-        print(request)
-
-
 @app.route('/api/dumb_json', methods=['POST'])
 def api_dumbjson():
     if request.method == 'POST':
@@ -122,6 +83,60 @@ def api_mirror():
         app.logger.debug("API MIRROR: %s", jsonify(request.get_json(force=False, silent=False, cache=False)))
         return jsonify(request.get_json(force=False, silent=False, cache=False)), 202
 
+
+@app.route('/api/test', methods=['GET', 'POST'])
+def api_test():
+    app.logger.debug("API TEST")
+    return "TEST", 202
+
+
+@app.route('/api/flight/<int:flight_number>/telemetry', methods=['POST'])
+def api_telemetry(flight_number):
+    if request.method != 'POST':
+        abort(405)
+
+    json_request = request.get_json(force=False, silent=False, cache=False)
+    if not json_request.has_key("flightHash"):
+        abort(400)
+
+    flightHash = json_request["flightHash"]
+    if not Controller.authenticate(flight_number, flightHash):
+        abort(401)
+
+    if json_request.has_key("data"):
+        app.logger.info("Telemetry data accepted")
+        # Controller.checkTelemetryJsonData(json_request["data"])
+        Controller.saveNewTelemetry(flight_number, json_request["data"])
+        WebController.refreshSite(flight_number)
+
+
+    return "OK", 201
+
+
+@app.route('/api/flight/<int:flight_number>/event/<string:event>', methods=['POST'])
+def api_events(flight_number, event):
+    if request.method != 'POST':
+        abort(405)
+
+    if not Controller.isValidEvent(event):
+        abort(400)
+
+    json_request = request.get_json(force=False, silent=False, cache=False)
+    if not json_request.has_key("flightHash"):
+        abort(400)
+
+    flightHash = json_request["flightHash"]
+    if not Controller.authenticate(flight_number, flightHash):
+        abort(401)
+
+    if json_request.has_key("data"):
+        # Controller.checkEventJsonData(json_request["data"])
+        Controller.saveEvent(json_request["data"])
+        WebController.refreshSite(flight_number)
+
+    return "OK", 201
+
+
 # -------- SOCKETS ---------
 
 @socketio.on('my_event', namespace='/socket/')
@@ -136,26 +151,9 @@ def test_connect():
     print("Message sent.")
 
 
-thread = None
-
-
 @socketio.on('connect', namespace='/map')
 def balloonUpdate():
     app.logger.info("Client connected")
     print ("Client connected")
     emit('message', {'data': '[Server]: You have been connected.'})
     global thread
-
-
-# if thread is None:
-# thread = socketio.start_background_task(target=background_thread)
-
-messageType = ["baloonLocation", "baloonStart", "baloonBurst", "baloonLanding", "baloonPathUpdate"]
-
-
-def background_thread():
-    while True:
-        socketio.sleep(5)
-        i = random.randint(0, len(messageType) - 1)
-        print("Sending " + messageType[i])
-        socketio.emit('baloon_update', {'type': messageType[i]}, namespace="/map")
