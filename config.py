@@ -10,6 +10,11 @@ class Config(object):
     SECRET_KEY = 'this-really-needs-to-be-changed'
     SQLALCHEMY_DATABASE_URI = 'sqlite:////users.sqlite3'
 
+    # DATABASE = os.path.join(app.root_path, 'flaskr.db'),
+    DATABASE = "C:\dev\TP\server\\balooooooon.sqlite3"
+    USERNAME = 'admin',
+    PASSWORD = 'admin'
+
     LOGGING_FORMAT = '%(asctime)s - [%(levelname)s] %(module)s.%(funcName)s(): %(message)s'
     LOGGING_LOCATION = 'balooooooon.log'
     LOGGING_LEVEL = logging.DEBUG

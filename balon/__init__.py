@@ -29,12 +29,22 @@ handler.setLevel(app.config['LOGGING_LEVEL'])
 formatter = logging.Formatter(app.config['LOGGING_FORMAT'])
 handler.setFormatter(formatter)
 app.logger.addHandler(handler)
+
+
+app.logger.info("Database Path: %s", app.config["DATABASE"])
+
 async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
 
+
+db = None
+
 import main
+import balon.database.DBConnector
+#TODO Test Database connection
 
 if (app.config["DEBUG"]):
+    print "DB_PATH: %s", app.config["DATABASE"]
     print("Starting flask app __init__.py")
 
 @app.route('/')
