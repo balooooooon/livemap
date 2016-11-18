@@ -16,10 +16,10 @@ from balon import app, socketio
 print "Current_app"
 print app.config["DEBUG"]
 
-if (app.config["DEBUG"]):
+if app.config["DEBUG"]:
     print("Starting flask app main.py")
 
-if (app.config["DEBUG"]):
+if app.config["DEBUG"]:
     print " -- Debug values: -- "
     print "getBalloonLocation:"
     print Controller.getBalloonLocation()
@@ -31,8 +31,10 @@ if (app.config["DEBUG"]):
     print Controller.getBalloonStart()
     print " -- Debug values  -- "
 
+
 def debug():
     return app.config["DEBUG"]
+
 
 @app.route('/map')
 def balloonDashboard():
@@ -113,9 +115,11 @@ def api_dumbjson():
         socketio.emit("baloon_update", json_request, namespace="/map")
         return "Data sent."
 
+
 @app.route('/api/mirror', methods=['POST'])
 def api_mirror():
     if request.method == 'POST':
+        app.logger.debug("API MIRROR: %s", jsonify(request.get_json(force=False, silent=False, cache=False)))
         return jsonify(request.get_json(force=False, silent=False, cache=False)), 202
 
 # -------- SOCKETS ---------
@@ -136,9 +140,10 @@ thread = None
 
 
 @socketio.on('connect', namespace='/map')
-def baloonUpdate():
-    print("Client connected");
-    emit('message', {'data': 'Client connected'})
+def balloonUpdate():
+    app.logger.info("Client connected")
+    print ("Client connected")
+    emit('message', {'data': '[Server]: You have been connected.'})
     global thread
 
 
