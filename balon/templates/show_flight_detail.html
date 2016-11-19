@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+	<title>Flight Detail</title>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/flights.css') }}">
+</head>
+<body>
+
+<div id="flight_wrapper">
+	<div id="flight_detail">
+		<h1>Flight #{{ flight.number }}</h1>
+		<h3>Start date: {{ flight.start_date }}</h3>
+		<h3>Hash: {{ flight.hash }}</h3>
+	</div>
+	<div id="flight_parameters">
+		<h3>No parameters.</h3>
+	</div>
+</div>
+
+</body>
+</html>

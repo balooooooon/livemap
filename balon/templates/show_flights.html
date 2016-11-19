@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flights</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/flights.css') }}">
+</head>
+<body>
+	<div id="flight_wrapper">
+
+		<form id="flights_add" method="post" action="/admin/flight/add">
+			Flight Number:<br>
+			<input type="text" name="flightNumber"><br>
+			Start Date:<br>
+			<input type="datetime-local" name="flightStartDate"><br>
+			<input type="submit" name="Save">
+		</form>
+
+		<table id="flights_table">
+		{% for flight in flights %}
+			<tr>
+				<td>{{ flight.id }}</td>
+				<td><a href="/admin/flight/{{flight.id}}/detail">{{ flight.number }}</a></td>
+				<td>{{ flight.hash }}</td>
+				<td>{{ flight.start_date }}</td>
+				<td><a href="/admin/flight/{{flight.id}}/delete">Delete</a></td>
+			</tr>
+		{% else %}
+			<tr><td>No Flights.</td></tr>
+		{% endfor %}	
+		</table>
+	</div>
+</body>
+</html>

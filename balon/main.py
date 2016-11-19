@@ -1,7 +1,7 @@
 # ----------------- IMPORTS -----------------
 
 # Flask imports
-from flask import Flask, render_template, request, url_for, current_app, jsonify, abort
+from flask import Flask, render_template, request, url_for, current_app, jsonify, abort, redirect, flash
 from flask_socketio import SocketIO, emit
 
 import json
@@ -64,6 +64,34 @@ def balloonDashboard():
 
     return render_template("index.html", async_mode=socketio.async_mode, balloon_data=data)
 
+@app.route('/admin/flight')
+def flight_administration():
+    flights = Controller.getFlightAll()
+    print flights
+    return render_template("show_flights.html", flights=flights)
+
+@app.route('/admin/flight/add', methods=['POST'])
+def add_flight():
+    if not request.method == 'POST':
+        abort(405)
+
+    if request.form['flightStartDate'] is not None and request.form['flightNumber'] is not None:
+        # flash("Flight saved.")
+        Controller.saveNewFlight(request.form['flightNumber'],request.form['flightStartDate'])
+    else:
+        app.logger.debug("Wrong input parameters for new Flight")
+
+    return redirect(url_for('flight_administration'))
+
+@app.route('/admin/flight/<int:flight_id>/detail')
+def flight_detail(flight_id):
+
+    flight = Controller.getFlightById(flight_id)
+
+    parameters = None
+    #parameters = Controller.getParametersAllByFlight(flight_id)
+
+    return render_template("show_flight_detail.html", parameters=parameters, flight=flight)
 
 # ------ API -------
 
@@ -107,7 +135,7 @@ def api_telemetry(flight_number):
         app.logger.info("Telemetry data accepted")
         # Controller.checkTelemetryJsonData(json_request["data"])
         Controller.saveNewTelemetry(flight_number, json_request["data"])
-        WebController.refreshSite(flight_number)
+        # WebController.refreshSite(flight_number)
 
 
     return "OK", 201
