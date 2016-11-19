@@ -1,86 +1,165 @@
 # http://stackoverflow.com/questions/15231359/split-python-flask-app-into-multiple-files
-import IBalloonService
-from balon.database import DBService
+import hashlib
+
+from balon.database import DBService as dao
+from balon import app
+from balon.models.Flight import Flight
+from balon.models.Parameter import Parameter
+from balon.models.Value import Value
 
 
-class BalloonService(IBalloonService):
+class BalloonService():
+    app = None
 
-	app = None
+    def getBalloonLocation(self, ):
+        if self.app.config['NO_DB']:
+            lat = 48.789562
+            lng = 19.773012
+            timestamp = 1477866660
 
-	DBService.app = app
+            location = {
+                'type': "current",
+                'point': {
+                    'time': timestamp,
+                    'lat': lat,
+                    'lng': lng
+                }
+            }
 
-	def getBalloonLocation(self,):
-		if self.app.config['NO_DB']:
-			lat = 48.789562
-			lng = 19.773012
-			timestamp = 1477866660
+        return location
 
-			location = {
-				'type': "current",
-				'point': {
-					'time': timestamp,
-					'lat': lat,
-					'lng': lng
-				}
-			}
+    def getBalloonStart(self):
+        if self.app.config['NO_DB']:
+            timestamp = 1477866660
 
-		return location
+            location = {
+                'type': "start",
+                'point': {
+                    'time': timestamp,
+                    'lat': 48.649259,
+                    'lng': 19.358272
+                }
+            }
 
-	def getBalloonStart(self):
-		if self.app.config['NO_DB']:
-			timestamp = 1477866660
+        return location
 
-			location = {
-				'type': "start",
-				'point': {
-					'time': timestamp,
-					'lat': 48.649259,
-					'lng': 19.358272
-				}
-			}
+    def getBalloonBurst(self):
+        if self.app.config['NO_DB']:
+            timestamp = 1477866660
 
-		return location
+            location = {
+                'type': "burst",
+                'point': {
+                    'time': timestamp,
+                    'lat': 48.687088,
+                    'lng': 19.667122
+                }
+            }
 
-	def getBalloonBurst(self):
-		if self.app.config['NO_DB']:
-			timestamp = 1477866660
+        return location
 
-			location = {
-				'type': "burst",
-				'point': {
-					'time': timestamp,
-					'lat': 48.687088,
-					'lng': 19.667122
-				}
-			}
+    def getBalloonPath(self):
+        if self.app.config['NO_DB']:
+            timestamp = 1477866660
 
-		return location
+            path = {}
+            path['type'] = 'path'
+            path['data'] = {
+                'points': [
+                    {'time': timestamp,
+                     'lat': 48.649259,
+                     'lng': 19.358272
+                     },
+                    {'time': timestamp,
+                     "lat": 48.755356,
+                     "lng": 19.581007
+                     },
+                    {'time': timestamp,
+                     "lat": 48.687088,
+                     "lng": 19.667122
+                     },
+                    {'time': timestamp,
+                     "lat": 48.789562,
+                     "lng": 19.773012
+                     }
+                ]
+            }
 
-	def getBalloonPath(self):
-		if self.app.config['NO_DB']:
-			timestamp = 1477866660
+        return path
 
-			path = {}
-			path['type'] = 'path'
-			path['data'] = {
-				'points': [
-					{'time': timestamp,
-					 'lat': 48.649259,
-					 'lng': 19.358272
-					 },
-					{'time': timestamp,
-					 "lat": 48.755356,
-					 "lng": 19.581007
-					 },
-					{'time': timestamp,
-					 "lat": 48.687088,
-					 "lng": 19.667122
-					 },
-					{'time': timestamp,
-					 "lat": 48.789562,
-					 "lng": 19.773012
-					 }
-				]
-			}
 
-		return path
+def getValueUnit(type):
+    #TODO
+    return "m"
+
+
+def saveParameterWithValues(flight, data, time_received):
+    app.logger.debug("saving paramter")
+
+    datetime = data['timestamp']
+
+    parameters = data['parameters']
+
+    for param in parameters:
+        type = param['type']
+        time_created = None
+
+        if param.has_key("timestamp"):
+            time_created = param['timestamp']
+        else:
+            time_created = datetime
+
+        p = Parameter(flight['id'],type,time_received,time_created)
+        p.id = dao.saveParameter(p)
+
+        values = []
+        values_dict = param['values']
+        for val in values_dict:
+            unit = getValueUnit(type)
+            name,value = val.items()[0]
+            values.append(Value(p.id,value,unit,name))
+
+        dao.saveValues(values)
+
+    return None
+
+
+def getFlightById(flight_id):
+    flight = dao.getFlightByKey(Flight.FlightEntry.KEY_ID, flight_id)
+    return flight
+
+
+def getFlightByNumber(flight_number):
+    flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
+    return flight
+
+
+def saveNewFlight(flight):
+    return dao.saveFlight(flight)
+
+
+def getFlightAll():
+    flights = dao.getFlightAll()
+    return flights
+
+
+def computeHash(number):
+    m = hashlib.md5()
+    m.update(number)
+    hash = m.hexdigest()
+
+    app.logger.debug("Calculated hash for number %d: %s", number, hash)
+    return hash
+
+
+def getParametersWithValuesByFlight(flight_id):
+
+    parameters = dao.getParametersByFlight(flight_id)
+    print parameters
+    for p in parameters:
+        print p.keys()
+        values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID,p["id"])
+        print values
+        p["values"] = values
+
+    return parameters
