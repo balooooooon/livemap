@@ -10,40 +10,23 @@ import json
 
 # Controller
 from balon.controller import Controller, WebController
-from balon import app, socketio, LOG
+from balon import app, socketio, LOG, db
 
 # ----------------- IMPORTS -----------------
-
+from balon.models.Flight import Flight
 
 LOG.debug("Starting flask app main.py")
 
-if app.config["DEBUG"]:
-    with app.app_context():
-        print " -- Debug values: -- "
-        print "getBalloonStart:"
-        print Controller.getBalloonStart(42)
-        print "getBalloonBurst:"
-        print Controller.getBalloonBurst(42)
-        print "getBalloonLocation:"
-        print Controller.getBalloonLocation(42)
-        print "getBalloonPath:"
-        print Controller.getBalloonPath(42)
-        print " -- Debug values  -- "
 
-
-def debug():
-    return app.config["DEBUG"]
-
-
-@app.route('/map', methods=['GET'])
+@app.route('/map')
 def balloonDashboard():
     # balloonStatus =
 
-    flight_number = None
-    if request.args["flight"]:
-        flight_number = request.args["flight"]
-    else:
-        flight_number = 42
+    flight_number = 42
+    # if request.args["flight"]:
+    #     flight_number = request.args["flight"]
+    # else:
+    #     flight_number = 42
 
     data = {}
 
@@ -101,8 +84,16 @@ def flight_detail(flight_id):
 
     return render_template("show_flight_detail.html", parameters=parameters, flight=flight)
 
+@app.template_filter('format_datetime')
+def jinja2_filter_datetime(date, format=None):
+    DEFAULT_FORMAT = "%d.%m.%Y %H:%M:%S"
+    if format:
+        return date.strftime(format)
+    else:
+        return date.strftime(DEFAULT_FORMAT)
 
-@app.template_filter('datetime')
+
+@app.template_filter('from_timestamp')
 def jinja2_filter_datetime(timestamp, format=None):
     DEFAULT_FORMAT = "%d.%m.%Y %H:%M:%S"
     date = datetime.fromtimestamp(timestamp)
@@ -153,7 +144,7 @@ def api_telemetry(flight_number):
     if json_request.has_key("data"):
         LOG.info("Telemetry data accepted")
         # Controller.checkTelemetryJsonData(json_request["data"])
-        Controller.saveNewTelemetry(flight_number, json_request["data"])
+        Controller.saveNewParameters(flight_number, json_request["data"])
         # WebController.refreshSite(flight_number)
 
     return "OK", 201

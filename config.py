@@ -8,7 +8,7 @@ class Config(object):
     TESTING = False
     CSRF_ENABLED = True
     SECRET_KEY = 'this-really-needs-to-be-changed'
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////users.sqlite3'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////dev/TP/server/balon.sqlite3'
 
     # DATABASE = os.path.join(app.root_path, 'flaskr.db'),
     DATABASE = "C:\dev\TP\server\\balooooooon.sqlite3"
@@ -46,6 +46,8 @@ class DevelopmentConfig(Config):
     DEVELOPMENT = True
     DEBUG = True
     NO_DB = True
+
+    SQLALCHEMY_ECHO = True
 
     APP_AUTHENTICATE_FLIGHT = False
 

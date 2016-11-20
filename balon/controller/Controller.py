@@ -2,34 +2,34 @@
 
 # Controller for Web, FB, API
 
-# import BalloonService
-import time
-
-import datetime
-
 from balon import app, LOG
 from balon.models.Flight import Flight
-from balon.models.Parameter import Parameter
 from balon.service import BalloonService as service
 
+import time
+import datetime
+
+
+# -------------------------
+#      Webpage Dashboard
+# -------------------------
 
 def getBalloonLocation(flight_number):
-
     position = None
 
-    flight = service.getFlightByNumber(flight_number)
-    parameter = service.getFlightLastPosition(flight['id'])
+    # flight = service.getFlightByNumber(flight_number)
+    parameter = service.getFlightLastPosition(flight_number)
 
     position = {
         'type': "current",
         'point': {
             'time': parameter.time_received,
-            'lat': parameter.values["lat"].value,
-            'lng': parameter.values["lng"].value
+            'lat': parameter.valuesDict["lat"].value,
+            'lng': parameter.valuesDict["lng"].value
         }
     }
 
-    LOG.debug("BalloonLocation: ",position)
+    LOG.debug("BalloonLocation: ", position)
 
     return position
 
@@ -37,15 +37,15 @@ def getBalloonLocation(flight_number):
 def getBalloonStart(flight_number):
     position = None
 
-    flight = service.getFlightByNumber(flight_number)
-    parameter = service.getFlightFirstPosition(flight['id'])
+    # flight = service.getFlightByNumber(flight_number)
+    parameter = service.getFlightFirstPosition(flight_number)
 
     position = {
         'type': "start",
         'point': {
             'time': parameter.time_received,
-            'lat': parameter.values["lat"].value,
-            'lng': parameter.values["lng"].value
+            'lat': parameter.valuesDict["lat"].value,
+            'lng': parameter.valuesDict["lng"].value
         }
     }
 
@@ -75,13 +75,13 @@ def getBalloonBurst(flight_number):
 def getBalloonPath(flight_number):
     position = None
 
-    flight = service.getFlightByNumber(flight_number)
-    parameters = service.getFlightPath(flight['id'])
+    # flight = service.getFlightByNumber(flight_number)
+    parameters = service.getFlightPath(flight_number)
 
     path = {
-        'type':"path",
-        'data':{
-            'points':[]
+        'type': "path",
+        'data': {
+            'points': []
         }
     }
 
@@ -89,8 +89,8 @@ def getBalloonPath(flight_number):
         LOG.debug(p)
         point = {
             'time': p.time_received,
-            'lat': p.values["lat"].value,
-            'lng': p.values["lng"].value
+            'lat': p.valuesDict["lat"].value,
+            'lng': p.valuesDict["lng"].value
         }
 
         path["data"]["points"].append(point)
@@ -100,6 +100,9 @@ def getBalloonPath(flight_number):
     return path
 
 
+# -------------------------
+#      API
+# -------------------------
 
 def authenticate(flight_number, auth_hash):
     # TODO
@@ -110,54 +113,81 @@ def authenticate(flight_number, auth_hash):
         return True
 
 
-def saveNewTelemetry(flight_number, data):
-    LOG.debug(data)
-
+def saveNewParameters(flight_number, data):
     flight = service.getFlightByNumber(flight_number)
+    # Get modified Flight object from DB
 
     time_received = int(time.time())
+    # Get time of message receive
 
     service.saveParameterWithValues(flight, data, time_received)
+    # Save new parameters
 
-    return None
+    return True
+
+
+def getParametersAllByFlight(flight_id):
+    flight = service.getFlightById(flight_id)
+    parameters = service.getParametersWithValuesByFlight(flight.id)
+    return parameters
 
 
 def isValidEvent(event):
-    return None
+    """
+    Check if event is valid
+    :param event: String
+    :return: True/False
+    """
+    # TODO
+    return True
 
 
 def saveEvent(param):
+    # TODO
     return None
+
 
 def saveNewFlight(number, datetime):
     LOG.info("Saving new Flight")
 
-    datetime = parseHTMLDateTime(datetime)
-    hash = service.computeHash(number)
+    datetime = parseHTMLDateTimeToDateTime(datetime)
+    # Parse DateTime formated by HTML input tag to Python datetime object
 
-    flight = Flight(int(number),hash,int(datetime))
+    hash = service.computeHash(number)
+    # Compute hash for Flight
+
+    flight = Flight(int(number), hash, datetime)
+    # Create new Flight object
 
     return service.saveNewFlight(flight)
+    # Save new Flight object
+
 
 def getFlightById(flight_id):
     flight = service.getFlightById(flight_id)
     return flight
+
 
 def getFlightAll():
     flights = service.getFlightAll()
     return flights
 
 
-def parseHTMLDateTime(date):
+def parseHTMLDateTimeToDateTime(date):
+    """
+    Thanks to:
+        http://stackoverflow.com/questions/9637838/convert-string-date-to-timestamp-in-python
+
+    :param date: HTML-formatted datetime
+    :return: Python datetime object
+    """
+    from datetime import datetime as dt
     HTML_DATETIME_FORMAT = "%Y-%m-%dT%H:%M"
-
     timestamp = time.mktime(datetime.datetime.strptime(date, HTML_DATETIME_FORMAT).timetuple())
-    # http://stackoverflow.com/questions/9637838/convert-string-date-to-timestamp-in-python
+    return dt.fromtimestamp(timestamp)
 
+
+def parseHTMLDateTimeToTimestamp(date):
+    HTML_DATETIME_FORMAT = "%Y-%m-%dT%H:%M"
+    timestamp = time.mktime(datetime.datetime.strptime(date, HTML_DATETIME_FORMAT).timetuple())
     return timestamp
-
-
-def getParametersAllByFlight(flight_id):
-    flight = service.getFlightById(flight_id)
-    parameters = service.getParametersWithValuesByFlight(flight["id"])
-    return parameters

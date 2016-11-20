@@ -30,7 +30,7 @@
 					<td>{{ flight.id }}</td>
 					<td><a href="/admin/flight/{{flight.id}}/detail">{{ flight.number }}</a></td>
 					<td>{{ flight.hash }}</td>
-					<td>{{ flight.start_date|datetime }}</td>
+					<td>{{ flight.start_date|format_datetime }}</td>
 					<td><a href="/admin/flight/{{flight.id}}/delete">X</a></td>
 				</tr>
 			{% endfor %}

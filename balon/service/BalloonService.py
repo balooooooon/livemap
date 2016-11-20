@@ -1,127 +1,21 @@
-# http://stackoverflow.com/questions/15231359/split-python-flask-app-into-multiple-files
-import hashlib
-
+from balon import app, LOG, db
 from balon.database import DBService as dao
-from balon import app, LOG
+
 from balon.models.Flight import Flight
 from balon.models.Parameter import Parameter
 from balon.models.Value import Value
 
-
-class BalloonService():
-    app = None
-
-    def getBalloonLocation(self, ):
-        if self.app.config['NO_DB']:
-            lat = 48.789562
-            lng = 19.773012
-            timestamp = 1477866660
-
-            location = {
-                'type': "current",
-                'point': {
-                    'time': timestamp,
-                    'lat': lat,
-                    'lng': lng
-                }
-            }
-
-        return location
-
-    def getBalloonStart(self):
-        if self.app.config['NO_DB']:
-            timestamp = 1477866660
-
-            location = {
-                'type': "start",
-                'point': {
-                    'time': timestamp,
-                    'lat': 48.649259,
-                    'lng': 19.358272
-                }
-            }
-
-        return location
-
-    def getBalloonBurst(self):
-        if self.app.config['NO_DB']:
-            timestamp = 1477866660
-
-            location = {
-                'type': "burst",
-                'point': {
-                    'time': timestamp,
-                    'lat': 48.687088,
-                    'lng': 19.667122
-                }
-            }
-
-        return location
-
-    def getBalloonPath(self):
-        if self.app.config['NO_DB']:
-            timestamp = 1477866660
-
-            path = {}
-            path['type'] = 'path'
-            path['data'] = {
-                'points': [
-                    {'time': timestamp,
-                     'lat': 48.649259,
-                     'lng': 19.358272
-                     },
-                    {'time': timestamp,
-                     "lat": 48.755356,
-                     "lng": 19.581007
-                     },
-                    {'time': timestamp,
-                     "lat": 48.687088,
-                     "lng": 19.667122
-                     },
-                    {'time': timestamp,
-                     "lat": 48.789562,
-                     "lng": 19.773012
-                     }
-                ]
-            }
-
-        return path
-
+import hashlib
+from datetime import datetime
 
 def getValueUnit(type):
     # TODO
     return "m"
 
 
-def saveParameterWithValues(flight, data, time_received):
-    LOG.debug("saving paramter")
-
-    datetime = data['timestamp']
-
-    parameters = data['parameters']
-
-    for param in parameters:
-        type = param['type']
-        time_created = None
-
-        if param.has_key("timestamp"):
-            time_created = param['timestamp']
-        else:
-            time_created = datetime
-
-        p = Parameter(flight['id'], type, time_received, time_created)
-        p.id = dao.saveParameter(p)
-
-        values = []
-        values_dict = param['values']
-        for key, val in values_dict.iteritems():
-            unit = getValueUnit(type)
-            values.append(Value(p.id, val, unit, key))
-
-        dao.saveValues(values)
-
-    return None
-
+# -------------------------
+#      Flight
+# -------------------------
 
 def getFlightById(flight_id):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_ID, flight_id)
@@ -145,11 +39,54 @@ def getFlightAll():
 def computeHash(number):
     m = hashlib.md5()
     m.update(number)
-    hash = m.hexdigest()
+    return m.hexdigest()
 
-    LOG.debug("Calculated hash for number %d: %s", int(number), hash)
-    return hash
 
+# -------------------------
+#      Parameters
+# -------------------------
+
+def saveParameterWithValues(flight, data, time_received):
+    dt = float(data['timestamp'])
+    parameters = data['parameters']
+
+    for param in parameters:
+        type = param['type']
+
+        if param.has_key("timestamp"):
+            time_created = datetime.fromtimestamp(float(param['timestamp']))
+        else:
+            time_created = datetime.fromtimestamp(dt)
+
+        p = Parameter(type, datetime.fromtimestamp(time_received), time_created)
+
+        inputValues = param['values']
+        for key, val in inputValues.iteritems():
+            unit = getValueUnit(type)
+            p.values.append(Value(val, unit, key))
+
+        flight.parameters.append(p)
+
+    db.session.add(flight)
+    db.session.commit()
+    return True
+
+
+def getParametersWithValuesByFlight(flight_id):
+    # flight = dao.getFlightById(flight_id)
+    parameters = dao.getParametersByFlight(flight_id)
+
+    # Storing values in dicttionary for better retrieval
+    # Possible to store in DB as PickleType
+    for p in parameters:
+        fillValuesDictionary(p)
+
+    return parameters
+
+
+# -------------------------
+#      Object creation
+# -------------------------
 
 def getParameterObject(p, values):
     param = Parameter(p["flight_id"], p["type"], p["time_received"], p["time_created"])
@@ -171,36 +108,47 @@ def getValueObject(v):
     return value
 
 
-def getParametersWithValuesByFlight(flight_id):
+# -------------------------
+#      For Dashboard
+# -------------------------
+
+def getFlightLastPosition(flight_number):
+    flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
+    parameter = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
+    LOG.debug(parameter)
+    # param = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight_number)
+    # values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, param["id"])
+    fillValuesDictionary(parameter)
+    # p = getParameterObject(param, values)
+    return parameter
+
+
+def getFlightFirstPosition(flight_number):
+    flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
+    parameter = dao.getParameterFirstByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
+    # param = dao.getParameterFirstByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight_id)
+    # values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, param["id"])
+    fillValuesDictionary(parameter)
+    # p = getParameterObject(param, values)
+    return parameter
+
+
+def getFlightPath(flight_number):
+    flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
+    parameters = dao.getParametersByKeyByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
+    for p in parameters:
+        fillValuesDictionary(p)
+
+    return parameters
+
     params = []
-    for p in dao.getParametersByFlight(flight_id):
-        values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, p["id"])
-        params.append(getParameterObject(p, values))
-
-    return params
-
-
-def getFlightLastPosition(flight_id):
-    param = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight_id)
-    values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, param["id"])
-    p = getParameterObject(param, values)
-
-    return p
-
-
-def getFlightFirstPosition(flight_id):
-    param = dao.getParameterFirstByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight_id)
-    values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, param["id"])
-    p = getParameterObject(param, values)
-
-    return p
-
-
-def getFlightPath(flight_id):
-    LOG.debug("AA")
-    params = []
-    for p in dao.getParametersByKeyByFlight(Parameter.ParameterEntry.KEY_TYPE,"position", flight_id):
+    for p in dao.getParametersByKeyByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight_id):
         LOG.debug(p)
         values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, p["id"])
         params.append(getParameterObject(p, values))
     return params
+
+def fillValuesDictionary(p):
+    p.valuesDict = {}
+    for v in p.values:
+        p.valuesDict[v.name] = v
