@@ -152,14 +152,25 @@ def computeHash(number):
     return hash
 
 
+def getParameterObject(p, values):
+    param = Parameter(p["flight_id"],p["type"],p["time_received"],p["time_created"])
+
+    param.id = p[Parameter.ParameterEntry.KEY_ID]
+    param.source = p["source"]
+    param.valid = p["valid"]
+    param.validated = p["validated"]
+
+    param.values = values
+
+    return param;
+
+
+
 def getParametersWithValuesByFlight(flight_id):
 
-    parameters = dao.getParametersByFlight(flight_id)
-    print parameters
-    for p in parameters:
-        print p.keys()
+    params = []
+    for p in dao.getParametersByFlight(flight_id):
         values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID,p["id"])
-        print values
-        p["values"] = values
+        params.append(getParameterObject(p,values))
 
-    return parameters
+    return params

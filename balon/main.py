@@ -89,7 +89,7 @@ def flight_detail(flight_id):
     flight = Controller.getFlightById(flight_id)
 
     parameters = None
-    #parameters = Controller.getParametersAllByFlight(flight_id)
+    parameters = Controller.getParametersAllByFlight(flight_id)
 
     return render_template("show_flight_detail.html", parameters=parameters, flight=flight)
 
