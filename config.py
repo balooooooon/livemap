@@ -15,6 +15,8 @@ class Config(object):
     USERNAME = 'admin',
     PASSWORD = 'admin'
 
+    LOGGING_LOGGER = "Balon Logger"
+
     LOGGING_FORMAT = '%(asctime)s - [%(levelname)s] %(module)s.%(funcName)s(): %(message)s'
     LOGGING_LOCATION = 'balooooooon.log'
     LOGGING_LEVEL = logging.DEBUG
@@ -28,7 +30,7 @@ class ProductionConfig(Config):
     DEBUG = False
     #SQLALCHEMY_DATABASE_URI = 'sqlite:////users.sqlite3'
     LOGGING_LOCATION = "/var/log/flask/balon.log"
-    LOGGING_LEVEL = logging.WARNING
+    LOGGING_LEVEL = logging.ERROR
 
     LOGGING_CONSOLE = False
 
