@@ -18,40 +18,50 @@ from balon import app, socketio, LOG
 LOG.debug("Starting flask app main.py")
 
 if app.config["DEBUG"]:
-    print " -- Debug values: -- "
-    print "getBalloonLocation:"
-    print Controller.getBalloonLocation()
-    print "getBalloonPath:"
-    print Controller.getBalloonPath()
-    print "getBalloonStart:"
-    print Controller.getBalloonBurst()
-    print "getBalloonBurst:"
-    print Controller.getBalloonStart()
-    print " -- Debug values  -- "
+    with app.app_context():
+        print " -- Debug values: -- "
+        print "getBalloonStart:"
+        print Controller.getBalloonStart(42)
+        print "getBalloonBurst:"
+        print Controller.getBalloonBurst(42)
+        print "getBalloonLocation:"
+        print Controller.getBalloonLocation(42)
+        print "getBalloonPath:"
+        print Controller.getBalloonPath(42)
+        print " -- Debug values  -- "
 
 
 def debug():
     return app.config["DEBUG"]
 
 
-@app.route('/map')
+@app.route('/map', methods=['GET'])
 def balloonDashboard():
     # balloonStatus =
 
-    balloonLocation = Controller.getBalloonLocation()
+    flight_number = None
+    if request.args["flight"]:
+        flight_number = request.args["flight"]
+    else:
+        flight_number = 42
 
-    balloonPath = Controller.getBalloonPath()
+    data = {}
 
-    balloonBurst = Controller.getBalloonBurst()
+    balloonLocation = Controller.getBalloonLocation(flight_number)
+    if balloonLocation:
+        data['location'] = balloonLocation
 
-    balloonStart = Controller.getBalloonStart()
+    balloonPath = Controller.getBalloonPath(flight_number)
+    if balloonPath:
+        data['path'] = balloonPath
 
-    data = {
-        'path': balloonPath,
-        'location': balloonLocation,
-        'burst': balloonBurst,
-        'start': balloonStart
-    }
+    balloonBurst = Controller.getBalloonBurst(flight_number)
+    if balloonBurst:
+        data['burst'] = balloonBurst
+
+    balloonStart = Controller.getBalloonStart(flight_number)
+    if balloonStart:
+        data['start'] = balloonStart
 
     # balloonLanding = getBalloonLanding()
 
@@ -61,10 +71,12 @@ def balloonDashboard():
 
     return render_template("index.html", async_mode=socketio.async_mode, balloon_data=data)
 
+
 @app.route('/admin/flight')
 def flight_administration():
     flights = Controller.getFlightAll()
     return render_template("show_flights.html", flights=flights)
+
 
 @app.route('/admin/flight/add', methods=['POST'])
 def add_flight():
@@ -73,21 +85,22 @@ def add_flight():
 
     if request.form['flightStartDate'] is not None and request.form['flightNumber'] is not None:
         # flash("Flight saved.")
-        Controller.saveNewFlight(request.form['flightNumber'],request.form['flightStartDate'])
+        Controller.saveNewFlight(request.form['flightNumber'], request.form['flightStartDate'])
     else:
         LOG.debug("Wrong input parameters for new Flight")
 
     return redirect(url_for('flight_administration'))
 
+
 @app.route('/admin/flight/<int:flight_id>/detail')
 def flight_detail(flight_id):
-
     flight = Controller.getFlightById(flight_id)
 
     parameters = None
     parameters = Controller.getParametersAllByFlight(flight_id)
 
     return render_template("show_flight_detail.html", parameters=parameters, flight=flight)
+
 
 @app.template_filter('datetime')
 def jinja2_filter_datetime(timestamp, format=None):
@@ -97,6 +110,7 @@ def jinja2_filter_datetime(timestamp, format=None):
         return date.strftime(format)
     else:
         return date.strftime(DEFAULT_FORMAT)
+
 
 # ------ API -------
 

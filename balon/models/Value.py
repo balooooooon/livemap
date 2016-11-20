@@ -1,7 +1,7 @@
 
-class Value():
+class Value:
 
-    class ValueEntry():
+    class ValueEntry:
         TABLE_NAME = "values"
 
         KEY_ID = "id"
@@ -18,4 +18,7 @@ class Value():
         self.unit = unit
 
     def __repr__(self):
+        return '<Value [%d] [P:%d] %r = %f>' % (self.id, self.parameter_id, self.name, self.value)
+
+    def __str__(self):
         return '<Value [%d] [P:%d] %r = %f>' % (self.id, self.parameter_id, self.name, self.value)

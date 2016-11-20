@@ -13,45 +13,48 @@ from balon.models.Parameter import Parameter
 from balon.service import BalloonService as service
 
 
-def getBalloonLocation():
-    location = None
+def getBalloonLocation(flight_number):
 
-    if app.config['NO_DB']:
-        lat = 48.789562
-        lng = 19.773012
-        timestamp = 1477866660
+    position = None
 
-        location = {
-            'type': "current",
-            'point': {
-                'time': timestamp,
-                'lat': lat,
-                'lng': lng
-            }
+    flight = service.getFlightByNumber(flight_number)
+    parameter = service.getFlightLastPosition(flight['id'])
+
+    position = {
+        'type': "current",
+        'point': {
+            'time': parameter.time_received,
+            'lat': parameter.values["lat"].value,
+            'lng': parameter.values["lng"].value
         }
+    }
 
-    return location
+    LOG.debug("BalloonLocation: ",position)
+
+    return position
 
 
-def getBalloonStart():
-    location = None
+def getBalloonStart(flight_number):
+    position = None
 
-    if app.config['NO_DB']:
-        timestamp = 1477866660
+    flight = service.getFlightByNumber(flight_number)
+    parameter = service.getFlightFirstPosition(flight['id'])
 
-        location = {
-            'type': "start",
-            'point': {
-                'time': timestamp,
-                'lat': 48.649259,
-                'lng': 19.358272
-            }
+    position = {
+        'type': "start",
+        'point': {
+            'time': parameter.time_received,
+            'lat': parameter.values["lat"].value,
+            'lng': parameter.values["lng"].value
         }
+    }
 
-    return location
+    LOG.debug("BalloonStart: ", position)
+
+    return position
 
 
-def getBalloonBurst():
+def getBalloonBurst(flight_number):
     location = None
 
     if app.config['NO_DB']:
@@ -66,39 +69,36 @@ def getBalloonBurst():
             }
         }
 
-    return location
+    return None
 
 
-def getBalloonPath():
-    path = None
+def getBalloonPath(flight_number):
+    position = None
 
-    if app.config['NO_DB']:
-        timestamp = 1477866660
+    flight = service.getFlightByNumber(flight_number)
+    parameters = service.getFlightPath(flight['id'])
 
-        path = {}
-        path['type'] = 'path'
-        path['data'] = {
-            'points': [
-                {'time': timestamp,
-                 'lat': 48.649259,
-                 'lng': 19.358272
-                 },
-                {'time': timestamp,
-                 "lat": 48.755356,
-                 "lng": 19.581007
-                 },
-                {'time': timestamp,
-                 "lat": 48.687088,
-                 "lng": 19.667122
-                 },
-                {'time': timestamp,
-                 "lat": 48.789562,
-                 "lng": 19.773012
-                 }
-            ]
+    path = {
+        'type':"path",
+        'data':{
+            'points':[]
+        }
+    }
+
+    for p in parameters:
+        LOG.debug(p)
+        point = {
+            'time': p.time_received,
+            'lat': p.values["lat"].value,
+            'lng': p.values["lng"].value
         }
 
+        path["data"]["points"].append(point)
+
+    LOG.debug("BalloonPath: ", path)
+
     return path
+
 
 
 def authenticate(flight_number, auth_hash):

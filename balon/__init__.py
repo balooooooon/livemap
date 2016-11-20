@@ -53,11 +53,12 @@ socketio = SocketIO(app, async_mode=async_mode)
 
 LOG.debug("Starting flask app __init__.py")
 
-db = None
 
-import main
 import balon.database.DBConnector
 
+import main
+
+db = None
 # TODO Test Database connection
 
 

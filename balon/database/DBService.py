@@ -20,7 +20,7 @@ def getFlightByKey(key, value):
 
 def getFlightAll():
     db = dbConnector.get_db()
-    cur = db.execute("SELECT id, number, hash, start_date FROM '{tn}'".\
+    cur = db.execute("SELECT id, number, hash, start_date FROM '{tn}'". \
                      format(tn=Flight.FlightEntry.TABLE_NAME))
     flights = cur.fetchall()
     return flights
@@ -81,12 +81,39 @@ def getParametersByKey(key, value):
     parameters = cur.fetchall()
     return parameters
 
+def getParametersByKeyByFlight(key, value, flight_id):
+    db = dbConnector.get_db()
+    query = "SELECT * FROM '{tn}' WHERE {id}={fid} AND {k}='{v}'".format(tn=Parameter.ParameterEntry.TABLE_NAME, id=Parameter.ParameterEntry.KEY_FLIGHT_ID,fid=flight_id, k=key, v=value)
+    LOG.debug("Query: %s" % query)
+    cur = db.execute(query)
+    parameters = cur.fetchall()
+    return parameters
+
+
+def getParameterLastByFlight(key, value, flight_id):
+    db = dbConnector.get_db()
+    query = "SELECT * FROM '{tn}' WHERE {k}='{v}' AND flight_id={fid} ORDER BY {order} DESC LIMIT 1".format(tn=Parameter.ParameterEntry.TABLE_NAME, k=key, v=value, fid=flight_id,
+                                  order=Parameter.ParameterEntry.KEY_TIME_RECEIVED)
+    LOG.debug("Query: %s" % query)
+    cur = db.execute(query)
+    p = cur.fetchone()
+    return p
+
+def getParameterFirstByFlight(key, value, flight_id):
+    db = dbConnector.get_db()
+    query = "SELECT * FROM '{tn}' WHERE {k}='{v}' AND flight_id={fid} ORDER BY {order} ASC LIMIT 1".format(
+        tn=Parameter.ParameterEntry.TABLE_NAME, k=key, v=value, fid=flight_id,
+        order=Parameter.ParameterEntry.KEY_TIME_RECEIVED)
+    LOG.debug("Query: %s" % query)
+    cur = db.execute(query)
+    p = cur.fetchone()
+    return p
 
 # ----- VALUE -----
 
 
 def saveValue(value):
-    if not isinstance(value,Value):
+    if not isinstance(value, Value):
         return False
 
     db = dbConnector.get_db()
@@ -121,3 +148,5 @@ def getValuesByKey(key, value):
     cur = db.execute("SELECT * FROM '{tn}' WHERE {k}={v}".format(tn=Value.ValueEntry.TABLE_NAME, k=key, v=value))
     values = cur.fetchall()
     return values
+
+

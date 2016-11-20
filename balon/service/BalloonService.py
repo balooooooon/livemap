@@ -89,7 +89,7 @@ class BalloonService():
 
 
 def getValueUnit(type):
-    #TODO
+    # TODO
     return "m"
 
 
@@ -109,15 +109,14 @@ def saveParameterWithValues(flight, data, time_received):
         else:
             time_created = datetime
 
-        p = Parameter(flight['id'],type,time_received,time_created)
+        p = Parameter(flight['id'], type, time_received, time_created)
         p.id = dao.saveParameter(p)
 
         values = []
         values_dict = param['values']
-        for val in values_dict:
+        for key, val in values_dict.iteritems():
             unit = getValueUnit(type)
-            name,value = val.items()[0]
-            values.append(Value(p.id,value,unit,name))
+            values.append(Value(p.id, val, unit, key))
 
         dao.saveValues(values)
 
@@ -148,29 +147,60 @@ def computeHash(number):
     m.update(number)
     hash = m.hexdigest()
 
-    LOG.debug("Calculated hash for number %d: %s", number, hash)
+    LOG.debug("Calculated hash for number %d: %s", int(number), hash)
     return hash
 
 
 def getParameterObject(p, values):
-    param = Parameter(p["flight_id"],p["type"],p["time_received"],p["time_created"])
+    param = Parameter(p["flight_id"], p["type"], p["time_received"], p["time_created"])
 
     param.id = p[Parameter.ParameterEntry.KEY_ID]
     param.source = p["source"]
     param.valid = p["valid"]
     param.validated = p["validated"]
 
-    param.values = values
+    param.values = {}
+    for v in values:
+        param.values[v["name"]] = getValueObject(v)
 
-    return param;
+    return param
 
+
+def getValueObject(v):
+    value = Value(v["parameter_id"], v["value"], v["unit"], v["name"])
+    return value
 
 
 def getParametersWithValuesByFlight(flight_id):
-
     params = []
     for p in dao.getParametersByFlight(flight_id):
-        values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID,p["id"])
-        params.append(getParameterObject(p,values))
+        values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, p["id"])
+        params.append(getParameterObject(p, values))
 
+    return params
+
+
+def getFlightLastPosition(flight_id):
+    param = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight_id)
+    values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, param["id"])
+    p = getParameterObject(param, values)
+
+    return p
+
+
+def getFlightFirstPosition(flight_id):
+    param = dao.getParameterFirstByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight_id)
+    values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, param["id"])
+    p = getParameterObject(param, values)
+
+    return p
+
+
+def getFlightPath(flight_id):
+    LOG.debug("AA")
+    params = []
+    for p in dao.getParametersByKeyByFlight(Parameter.ParameterEntry.KEY_TYPE,"position", flight_id):
+        LOG.debug(p)
+        values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, p["id"])
+        params.append(getParameterObject(p, values))
     return params
