@@ -24,18 +24,26 @@ app.config.from_object('config.DevelopmentConfig')
 app.config.from_envvar('BALLOON_CONFIG', silent=True)
 
 # Configure logging
+LOG = logging.getLogger("My Logger")
+
 handler = logging.FileHandler(app.config['LOGGING_LOCATION'])
-handler.setLevel(app.config['LOGGING_LEVEL'])
 formatter = logging.Formatter(app.config['LOGGING_FORMAT'])
+handler.setLevel(app.config['LOGGING_LEVEL'])
 handler.setFormatter(formatter)
-app.logger.addHandler(handler)
+LOG.addHandler(handler)
 
+if( app.config['LOGGING_CONSOLE'] ):
+    streamHandler = logging.StreamHandler()
+    streamHandler.setLevel(logging.WARNING)
+    streamHandler.setFormatter(formatter)
+    LOG.addHandler(streamHandler)
 
-app.logger.info("Database Path: %s", app.config["DATABASE"])
+# app.logger.propagate = False
+
+LOG.debug("Database Path: %s", app.config["DATABASE"])
 
 async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
-
 
 db = None
 
@@ -43,9 +51,7 @@ import main
 import balon.database.DBConnector
 #TODO Test Database connection
 
-if (app.config["DEBUG"]):
-    print "DB_PATH: %s", app.config["DATABASE"]
-    print("Starting flask app __init__.py")
+LOG.debug("Starting flask app __init__.py")
 
 @app.route('/')
 def hello_world():

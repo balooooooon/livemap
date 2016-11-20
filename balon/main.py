@@ -10,15 +10,12 @@ import json
 
 # Controller
 from balon.controller import Controller, WebController
-from balon import app, socketio
+from balon import app, socketio, LOG
 
 # ----------------- IMPORTS -----------------
 
-print "Current_app"
-print app.config["DEBUG"]
 
-if app.config["DEBUG"]:
-    print("Starting flask app main.py")
+LOG.debug("Starting flask app main.py")
 
 if app.config["DEBUG"]:
     print " -- Debug values: -- "
@@ -60,16 +57,13 @@ def balloonDashboard():
 
     # balloonTelemetry = getActualTelemetry()
 
-    if (debug()):
-        print "Sending data: "
-        print data
+    LOG.debug("Sending data: ", data)
 
     return render_template("index.html", async_mode=socketio.async_mode, balloon_data=data)
 
 @app.route('/admin/flight')
 def flight_administration():
     flights = Controller.getFlightAll()
-    print flights
     return render_template("show_flights.html", flights=flights)
 
 @app.route('/admin/flight/add', methods=['POST'])
@@ -81,7 +75,7 @@ def add_flight():
         # flash("Flight saved.")
         Controller.saveNewFlight(request.form['flightNumber'],request.form['flightStartDate'])
     else:
-        app.logger.debug("Wrong input parameters for new Flight")
+        LOG.debug("Wrong input parameters for new Flight")
 
     return redirect(url_for('flight_administration'))
 
@@ -109,9 +103,9 @@ def jinja2_filter_datetime(timestamp, format=None):
 @app.route('/api/dumb_json', methods=['POST'])
 def api_dumbjson():
     if request.method == 'POST':
-        print("POST request")
+        LOG.info("POST request")
         json_request = json.dumps(request.get_json(force=False, silent=False, cache=False))
-        print(json_request)
+        LOG.debug(json_request)
         socketio.emit("baloon_update", json_request, namespace="/map")
         return "Data sent."
 
@@ -119,13 +113,13 @@ def api_dumbjson():
 @app.route('/api/mirror', methods=['POST'])
 def api_mirror():
     if request.method == 'POST':
-        app.logger.debug("API MIRROR: %s", jsonify(request.get_json(force=False, silent=False, cache=False)))
+        LOG.debug("API MIRROR: %s", jsonify(request.get_json(force=False, silent=False, cache=False)))
         return jsonify(request.get_json(force=False, silent=False, cache=False)), 202
 
 
 @app.route('/api/test', methods=['GET', 'POST'])
 def api_test():
-    app.logger.debug("API TEST")
+    LOG.debug("API TEST")
     return "TEST", 202
 
 
@@ -143,11 +137,10 @@ def api_telemetry(flight_number):
         abort(401)
 
     if json_request.has_key("data"):
-        app.logger.info("Telemetry data accepted")
+        LOG.info("Telemetry data accepted")
         # Controller.checkTelemetryJsonData(json_request["data"])
         Controller.saveNewTelemetry(flight_number, json_request["data"])
         # WebController.refreshSite(flight_number)
-
 
     return "OK", 201
 
@@ -185,14 +178,13 @@ def sendMessage():
 
 @socketio.on('connect', namespace='/socket/')
 def test_connect():
-    print("Connected.")
+    LOG.info("Connected.")
     emit('message', {'data': 'Connected to Socket'})
-    print("Message sent.")
+    LOG.debug("Message sent.")
 
 
 @socketio.on('connect', namespace='/map')
 def balloonUpdate():
-    app.logger.info("Client connected")
-    print ("Client connected")
+    LOG.info("Client connected")
     emit('message', {'data': '[Server]: You have been connected.'})
     global thread

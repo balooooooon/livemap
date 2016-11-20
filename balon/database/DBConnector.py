@@ -1,5 +1,5 @@
 from sqlite3 import dbapi2 as sqlite3
-from balon import app
+from balon import app, LOG
 from flask import g
 
 def connect_db():
@@ -27,7 +27,7 @@ def get_db():
 def initdb_command():
     """Creates the database tables."""
     init_db()
-    print('Initialized the database.')
+    LOG.info('Initialized the database.')
 
 @app.teardown_appcontext
 def close_db(error):

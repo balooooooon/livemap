@@ -2,7 +2,7 @@
 import hashlib
 
 from balon.database import DBService as dao
-from balon import app
+from balon import app, LOG
 from balon.models.Flight import Flight
 from balon.models.Parameter import Parameter
 from balon.models.Value import Value
@@ -94,7 +94,7 @@ def getValueUnit(type):
 
 
 def saveParameterWithValues(flight, data, time_received):
-    app.logger.debug("saving paramter")
+    LOG.debug("saving paramter")
 
     datetime = data['timestamp']
 
@@ -148,7 +148,7 @@ def computeHash(number):
     m.update(number)
     hash = m.hexdigest()
 
-    app.logger.debug("Calculated hash for number %d: %s", number, hash)
+    LOG.debug("Calculated hash for number %d: %s", number, hash)
     return hash
 
 

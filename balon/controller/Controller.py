@@ -7,7 +7,7 @@ import time
 
 import datetime
 
-from balon import app
+from balon import app, LOG
 from balon.models.Flight import Flight
 from balon.models.Parameter import Parameter
 from balon.service import BalloonService as service
@@ -104,15 +104,14 @@ def getBalloonPath():
 def authenticate(flight_number, auth_hash):
     # TODO
     if app.config["APP_AUTHENTICATE_FLIGHT"]:
-        app.logger.critical("Authenticating Not Implemented")
+        LOG.critical("Authenticating Not Implemented")
         return False
     else:
         return True
 
 
 def saveNewTelemetry(flight_number, data):
-    app.logger.debug(data)
-    print data
+    LOG.debug(data)
 
     flight = service.getFlightByNumber(flight_number)
 
@@ -131,7 +130,7 @@ def saveEvent(param):
     return None
 
 def saveNewFlight(number, datetime):
-    app.logger.info("Saving new Flight")
+    LOG.info("Saving new Flight")
 
     datetime = parseHTMLDateTime(datetime)
     hash = service.computeHash(number)

@@ -1,6 +1,6 @@
 import sqlite3
 
-from balon import app
+from balon import app, LOG
 import DBConnector as dbConnector
 from balon.models.Flight import Flight
 from balon.models.Parameter import Parameter
@@ -28,7 +28,7 @@ def getFlightAll():
 
 def saveFlight(flight):
     if not isinstance(flight, Flight):
-        app.logger.error("Object is not class Flight")
+        LOG.error("Object is not class Flight")
         # TODO Exception
         return False
 
@@ -42,7 +42,7 @@ def saveFlight(flight):
 
 def updateFlight(flight):
     if not isinstance(flight, Flight):
-        app.logger.error("Object is not class Flight")
+        LOG.error("Object is not class Flight")
         # TODO Exception
         return False
 
@@ -110,8 +110,7 @@ def saveValues(values):
         db.commit()
 
     except db.Error, e:
-        app.logger.error("DB Error: %s", e.args[0])
-        print("Error: %s" % e.args[0])
+        LOG.error("DB Error: %s", e.args[0])
         return False
 
     return True
