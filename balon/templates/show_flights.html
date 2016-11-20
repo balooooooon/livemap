@@ -16,19 +16,28 @@
 			<input type="submit" name="Save">
 		</form>
 
-		<table id="flights_table">
-		{% for flight in flights %}
-			<tr>
-				<td>{{ flight.id }}</td>
-				<td><a href="/admin/flight/{{flight.id}}/detail">{{ flight.number }}</a></td>
-				<td>{{ flight.hash }}</td>
-				<td>{{ flight.start_date }}</td>
-				<td><a href="/admin/flight/{{flight.id}}/delete">Delete</a></td>
-			</tr>
+		{% if flights %}
+			<table id="flights_table">
+				<tr>
+					<td>ID</td>
+					<td>#</td>
+					<td>Hash</td>
+					<td>Start date</td>
+					<td>Delete</td>
+				</tr>
+			{% for flight in flights %}
+				<tr>
+					<td>{{ flight.id }}</td>
+					<td><a href="/admin/flight/{{flight.id}}/detail">{{ flight.number }}</a></td>
+					<td>{{ flight.hash }}</td>
+					<td>{{ flight.start_date|datetime }}</td>
+					<td><a href="/admin/flight/{{flight.id}}/delete">X</a></td>
+				</tr>
+			{% endfor %}
+			</table>
 		{% else %}
-			<tr><td>No Flights.</td></tr>
-		{% endfor %}	
-		</table>
+			<h3>No Flights.</h3>
+		{% endif %}
 	</div>
 </body>
 </html>

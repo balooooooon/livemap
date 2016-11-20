@@ -10,8 +10,20 @@
 	border-bottom: 1px solid #ccc;
 }
 
-#flight_parameters table:nth-child(2){
+#flight_parameters > table {
+    width: 100%
+}
+
+#flight_parameters > table tr:nth-child(odd){
 	background-color: #eee;
+}
+
+#flight_parameters tr {
+    margin: 5px 10px;
+}
+
+#flight_parameters td {
+    padding: 5px;
 }
 
 /* For show_flights.html */
@@ -19,7 +31,7 @@
 	width: 100%;
 }
 
-#flights_table:nth-child(2) {
+#flights_table tr:nth-child(odd) {
 	background-color: #eee
 }
 

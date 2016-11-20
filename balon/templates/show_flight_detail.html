@@ -10,11 +10,35 @@
 <div id="flight_wrapper">
 	<div id="flight_detail">
 		<h1>Flight #{{ flight.number }}</h1>
-		<h3>Start date: {{ flight.start_date }}</h3>
+		<h3>Start date: {{ flight.start_date|datetime }}</h3>
 		<h3>Hash: {{ flight.hash }}</h3>
 	</div>
 	<div id="flight_parameters">
-		<h3>No parameters.</h3>
+		{% if parameters %}
+			<table>
+				<tr>
+					<td>ID</td>
+					<td>Type</td>
+					<td>Time Created</td>
+					<td>Values</td>
+				</tr>
+				{% for parameter in parameters %}
+					<tr>
+						<td>{{ parameter.id }}</td>
+						<td>{{ parameter.type }}</td>
+						<td>{{ parameter.time_created|datetime }}</td>
+						<td>
+							{% for val in parameter.values %}
+								{{ val.name }}: {{ val.value }}<br>
+							{% endfor %}
+						</td>
+					</tr>
+				{% endfor %}
+			</table>
+		{% else %}
+			<h3>No parameters.</h3>
+		{% endif %}
+
 	</div>
 </div>
 

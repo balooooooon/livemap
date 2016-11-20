@@ -1,6 +1,8 @@
 # ----------------- IMPORTS -----------------
 
 # Flask imports
+from datetime import datetime
+
 from flask import Flask, render_template, request, url_for, current_app, jsonify, abort, redirect, flash
 from flask_socketio import SocketIO, emit
 
@@ -92,6 +94,15 @@ def flight_detail(flight_id):
     parameters = Controller.getParametersAllByFlight(flight_id)
 
     return render_template("show_flight_detail.html", parameters=parameters, flight=flight)
+
+@app.template_filter('datetime')
+def jinja2_filter_datetime(timestamp, format=None):
+    DEFAULT_FORMAT = "%d.%m.%Y %H:%M:%S"
+    date = datetime.fromtimestamp(timestamp)
+    if format:
+        return date.strftime(format)
+    else:
+        return date.strftime(DEFAULT_FORMAT)
 
 # ------ API -------
 
