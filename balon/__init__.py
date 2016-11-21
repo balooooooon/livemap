@@ -54,16 +54,15 @@ socketio = SocketIO(app, async_mode=async_mode)
 
 LOG.debug("Starting flask app __init__.py")
 
-
 db = SQLAlchemy(app)
 # db.create_all()
 # TODO Test Database connection
 
-import balon.database.DBConnector
+# from models import Event,Value,Parameter,Flight
+
+# import balon.database.DBConnector
 
 import main
-
-
 
 @app.route('/')
 def hello_world():

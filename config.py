@@ -16,8 +16,9 @@ class Config(object):
     PASSWORD = 'admin'
 
     LOGGING_LOGGER = "Balon Logger"
+    LOGGING_LOGGER_DB = "DB Logger"
 
-    LOGGING_FORMAT = '%(asctime)s - [%(levelname)s] %(module)s.%(funcName)s(): %(message)s'
+    LOGGING_FORMAT = '%(asctime)s - %(name)s [%(levelname)s] %(module)s.%(funcName)s(): %(message)s'
     LOGGING_LOCATION = 'balooooooon.log'
     LOGGING_LEVEL = logging.DEBUG
 
@@ -47,7 +48,8 @@ class DevelopmentConfig(Config):
     DEBUG = True
     NO_DB = True
 
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False
+    SQLALCHEMY_RECORD_QUERIES = True
 
     APP_AUTHENTICATE_FLIGHT = False
 

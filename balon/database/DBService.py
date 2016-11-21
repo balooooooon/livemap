@@ -1,8 +1,20 @@
-from balon import db as newDB
-from balon import app, LOG
+import logging
+
+from flask_sqlalchemy import get_debug_queries
+
+from balon import db
+from balon import app
 
 from balon.models.Flight import Flight
 from balon.models.Parameter import Parameter
+
+LOG = logging.getLogger(app.config['LOGGING_LOGGER_DB'])
+formatter = logging.Formatter(app.config['LOGGING_FORMAT'])
+handler = logging.FileHandler(app.config['LOGGING_LOCATION'])
+handler.setFormatter(formatter)
+handler.setLevel(app.config['LOGGING_LEVEL'])
+LOG.addHandler(handler)
+LOG.setLevel(logging.DEBUG)
 
 
 # -------------------------
@@ -11,33 +23,47 @@ from balon.models.Parameter import Parameter
 
 def getFlightByKey(key, value):
     q = {key: value}
+    LOG.info("Query for flight with ",q)
     flight = Flight.query.filter_by(**q).first()
     return flight
 
 
 def getFlightById(flight_id):
+    LOG.info("Query for flight with id: %d",flight_id)
     return Flight.query.get(flight_id)
 
 
 def getFlightAll():
-    return Flight.query.all()
-
+    LOG.info("Query for all flights with ")
+    flight =  Flight.query.all()
+    LOG.info(get_debug_queries()[0])
+    return flight
 
 def saveFlight(flight):
-    newDB.session.add(flight)
-    newDB.session.commit()
+    db.session.add(flight)
+    db.session.commit()
     return True
 
 
 def updateFlight(flight):
-    newDB.session.add(flight)
-    newDB.session.commit()
+    db.session.add(flight)
+    db.session.commit()
     return True
 
 
 def deleteFlight(flight):
-    newDB.session.delete(flight)
-    newDB.session.commit()
+    db.session.delete(flight)
+    db.session.commit()
+    return True
+
+
+# -------------------------
+#      Parameter
+# -------------------------
+
+def saveEvent(event):
+    db.session.add(event)
+    db.session.commit()
     return True
 
 
@@ -46,8 +72,8 @@ def deleteFlight(flight):
 # -------------------------
 
 def saveParameter(parameter):
-    newDB.session.add(parameter)
-    newDB.session.commit()
+    db.session.add(parameter)
+    db.session.commit()
     return parameter.id
 
 
@@ -74,3 +100,8 @@ def getParameterFirstByFlight(key, value, flight_id):
     parameter = Parameter.query.filter_by(**q).order_by(Parameter.time_received.asc()).first()
     return parameter
 
+
+def getEventsByFlight(flight_id):
+    flight = Flight.query.get(flight_id)
+    events = flight.events
+    return events

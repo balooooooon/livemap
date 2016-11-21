@@ -1,5 +1,6 @@
 from balon import app, LOG, db
 from balon.database import DBService as dao
+from balon.models.Event import Event
 
 from balon.models.Flight import Flight
 from balon.models.Parameter import Parameter
@@ -7,6 +8,7 @@ from balon.models.Value import Value
 
 import hashlib
 from datetime import datetime
+
 
 def getValueUnit(type):
     # TODO
@@ -46,6 +48,37 @@ def computeHash(number):
 #      Parameters
 # -------------------------
 
+def saveNewEvent(flight, data, time_received):
+    dt = float(data['timestamp'])
+
+    parameters = data['parameters']
+
+    event = Event(data['event'], datetime.fromtimestamp(dt))
+
+    for param in parameters:
+        type = param['type']
+
+        if param.has_key("timestamp"):
+            time_created = datetime.fromtimestamp(float(param['timestamp']))
+        else:
+            time_created = datetime.fromtimestamp(dt)
+
+        p = Parameter(type, datetime.fromtimestamp(time_received), time_created)
+
+        inputValues = param['values']
+        for key, val in inputValues.iteritems():
+            unit = getValueUnit(type)
+            p.values.append(Value(val, unit, key))
+
+        flight.parameters.append(p)
+        event.parameters.append(p)
+
+    dao.saveFlight(flight)
+    dao.saveEvent(event)
+
+    return True
+
+
 def saveParameterWithValues(flight, data, time_received):
     dt = float(data['timestamp'])
     parameters = data['parameters']
@@ -67,8 +100,7 @@ def saveParameterWithValues(flight, data, time_received):
 
         flight.parameters.append(p)
 
-    db.session.add(flight)
-    db.session.commit()
+    dao.saveFlight(flight)
     return True
 
 
@@ -83,6 +115,17 @@ def getParametersWithValuesByFlight(flight_id):
 
     return parameters
 
+
+
+
+def getEventsByFlight(flight_id):
+    events = dao.getEventsByFlight(flight_id)
+    for e in events:
+        fillParametersDictionary(e)
+        for p in e.parameters:
+            fillValuesDictionary(p)
+
+    return events
 
 # -------------------------
 #      Object creation
@@ -116,20 +159,14 @@ def getFlightLastPosition(flight_number):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameter = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
     LOG.debug(parameter)
-    # param = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight_number)
-    # values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, param["id"])
     fillValuesDictionary(parameter)
-    # p = getParameterObject(param, values)
     return parameter
 
 
 def getFlightFirstPosition(flight_number):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameter = dao.getParameterFirstByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
-    # param = dao.getParameterFirstByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight_id)
-    # values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, param["id"])
     fillValuesDictionary(parameter)
-    # p = getParameterObject(param, values)
     return parameter
 
 
@@ -141,14 +178,15 @@ def getFlightPath(flight_number):
 
     return parameters
 
-    params = []
-    for p in dao.getParametersByKeyByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight_id):
-        LOG.debug(p)
-        values = dao.getValuesByKey(Value.ValueEntry.KEY_PARAMETER_ID, p["id"])
-        params.append(getParameterObject(p, values))
-    return params
 
 def fillValuesDictionary(p):
     p.valuesDict = {}
     for v in p.values:
         p.valuesDict[v.name] = v
+
+def fillParametersDictionary(e):
+    e.parametersDict = {}
+    for p in e.parameters:
+        fillValuesDictionary(p)
+        e.parametersDict[p.type] = p
+

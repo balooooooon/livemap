@@ -10,19 +10,19 @@
 	border-bottom: 1px solid #ccc;
 }
 
-#flight_parameters > table {
+.flight_parameters table {
     width: 100%
 }
 
-#flight_parameters > table tr:nth-child(odd){
+.flight_parameters table tr:nth-child(odd){
 	background-color: #eee;
 }
 
-#flight_parameters tr {
+.flight_parameters tr {
     margin: 5px 10px;
 }
 
-#flight_parameters td {
+.flight_parameters td {
     padding: 5px;
 }
 

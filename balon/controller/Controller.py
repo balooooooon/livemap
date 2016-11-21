@@ -132,7 +132,12 @@ def getParametersAllByFlight(flight_id):
     return parameters
 
 
-def isValidEvent(event):
+def getEventsAllByFlight(flight_id):
+    flight = service.getFlightById(flight_id)
+    events = service.getEventsByFlight(flight.id)
+    return events
+
+def isValidEvent(event,ev):
     """
     Check if event is valid
     :param event: String
@@ -142,9 +147,17 @@ def isValidEvent(event):
     return True
 
 
-def saveEvent(param):
-    # TODO
-    return None
+def saveNewEvent(flight_number,event,data):
+    LOG.info("Saving new Event")
+
+    if not isValidEvent(data['event'],event):
+        return False
+
+    flight = service.getFlightByNumber(flight_number)
+
+    time_received = int(time.time())
+
+    return service.saveNewEvent(flight,data,time_received)
 
 
 def saveNewFlight(number, datetime):

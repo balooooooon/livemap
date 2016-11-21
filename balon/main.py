@@ -77,12 +77,15 @@ def add_flight():
 
 @app.route('/admin/flight/<int:flight_id>/detail')
 def flight_detail(flight_id):
+    # TODO Change flight id to flight number
     flight = Controller.getFlightById(flight_id)
 
     parameters = None
     parameters = Controller.getParametersAllByFlight(flight_id)
+    events = Controller.getEventsAllByFlight(flight_id)
 
-    return render_template("show_flight_detail.html", parameters=parameters, flight=flight)
+    return render_template("show_flight_detail.html", parameters=parameters, flight=flight, events=events)
+
 
 @app.template_filter('format_datetime')
 def jinja2_filter_datetime(date, format=None):
@@ -168,8 +171,8 @@ def api_events(flight_number, event):
 
     if json_request.has_key("data"):
         # Controller.checkEventJsonData(json_request["data"])
-        Controller.saveEvent(json_request["data"])
-        WebController.refreshSite(flight_number)
+        Controller.saveNewEvent(flight_number,event,json_request["data"])
+        # WebController.refreshSite(flight_number)
 
     return "OK", 201
 
@@ -193,3 +196,8 @@ def balloonUpdate():
     LOG.info("Client connected")
     emit('message', {'data': '[Server]: You have been connected.'})
     global thread
+
+
+def init_db():
+    from models import Flight, Parameter, Value, Event
+    db.create_all()

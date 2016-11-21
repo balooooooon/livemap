@@ -7,12 +7,13 @@ class Flight(db.Model):
     hash = db.Column(db.String(50))
     start_date = db.Column(db.DateTime)
     parameters = db.relationship('Parameter', backref="flight", lazy='dynamic')
+    events = db.relationship('Event', backref="flight", lazy='dynamic')
 
     class FlightEntry:
         TABLE_NAME = "flight"
         KEY_ID = "id"
         KEY_NUMBER = "number"
-        KEY_hash = "hash"
+        KEY_HASH = "hash"
         KEY_START_DATE = "start_date"
 
     def __init__(self, number, hash, date):
