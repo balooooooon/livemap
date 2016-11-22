@@ -9,6 +9,7 @@ from flask_socketio import SocketIO, emit
 import json
 
 # Controller
+from balon.controller import Controller, WebController, SocialController
 from balon import app, socketio, LOG, db
 
 # ----------------- IMPORTS -----------------
