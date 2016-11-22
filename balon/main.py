@@ -9,7 +9,6 @@ from flask_socketio import SocketIO, emit
 import json
 
 # Controller
-from balon.controller import Controller, WebController
 from balon import app, socketio, LOG, db
 
 # ----------------- IMPORTS -----------------
@@ -149,6 +148,7 @@ def api_telemetry(flight_number):
         # Controller.checkTelemetryJsonData(json_request["data"])
         Controller.saveNewParameters(flight_number, json_request["data"])
         # WebController.refreshSite(flight_number)
+        # SocialController.postStatuses(altitude,timestamp)
 
     return "OK", 201
 
