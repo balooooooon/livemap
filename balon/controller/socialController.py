@@ -1,11 +1,12 @@
+@@ -0,0 +1,41 @@
 from balon import app, LOG
 import facebook
 import tweepy
 
 
 
-MSG_FACEBOOK = "NÃ¡Å¡ balÃ³n sa prÃ¡ve nachÃ¡dza vo vÃ½Å¡ke {}"
-MSG_TWITTER = "NÃ¡Å¡ balÃ³n sa prÃ¡ve nachÃ¡dza vo vÃ½Å¡ke {}"
+MSG_FACEBOOK = "Náš balón sa práve nachádza vo výške {}"
+MSG_TWITTER = "Náš balón sa práve nachádza vo výške {}"
 
 def getTwitterApi():
     auth = tweepy.OAuthHandler(app.config['TWITTER_CONSUMER_KEY'], app.config['TWITTER_CONSUMER_SECRET'])
@@ -33,7 +34,6 @@ def postStatuses(altitude,timestamp):
     if ((end - start).total_seconds()) > 60 :
         postFacebookStatus(altitude)
         postTwitterStatus(altitude)
-
 
 
 
