@@ -1,122 +1,181 @@
 # ----------------- IMPORTS -----------------
 
 # Flask imports
-from flask import Flask, render_template, request, url_for, current_app
-from flask_socketio import SocketIO, emit
-from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
-import random
+from flask import Flask, render_template, request, url_for, current_app, jsonify, abort, redirect, flash
+from flask_socketio import SocketIO, emit
+
 import json
 
 # Controller
-from controller import Controller
-from balon import app, socketio
+from balon.controller import Controller, WebController, SocialController
+from balon import app, socketio, LOG, db
+
 # ----------------- IMPORTS -----------------
+from balon.models.Flight import Flight
 
-print "Current_app"
-print app.config["DEBUG"]
+LOG.debug("Starting flask app main.py")
 
-if (app.config["DEBUG"]):
-    print("Starting flask app main.py")
-
-if (app.config["DEBUG"]):
-    print " -- Debug values: -- "
-    print "getBalloonLocation:"
-    print Controller.getBalloonLocation()
-    print "getBalloonPath:"
-    print Controller.getBalloonPath()
-    print "getBalloonStart:"
-    print Controller.getBalloonBurst()
-    print "getBalloonBurst:"
-    print Controller.getBalloonStart()
-    print " -- Debug values  -- "
-
-def debug():
-    return app.config["DEBUG"]
 
 @app.route('/map')
 def balloonDashboard():
     # balloonStatus =
 
-    balloonLocation = Controller.getBalloonLocation()
+    flight_number = 42
+    # if request.args["flight"]:
+    #     flight_number = request.args["flight"]
+    # else:
+    #     flight_number = 42
 
-    balloonPath = Controller.getBalloonPath()
+    data = {}
 
-    balloonBurst = Controller.getBalloonBurst()
+    balloonLocation = Controller.getBalloonLocation(flight_number)
+    if balloonLocation:
+        data['location'] = balloonLocation
 
-    balloonStart = Controller.getBalloonStart()
+    balloonPath = Controller.getBalloonPath(flight_number)
+    if balloonPath:
+        data['path'] = balloonPath
 
-    data = {
-        'path': balloonPath,
-        'location': balloonLocation,
-        'burst': balloonBurst,
-        'start': balloonStart
-    }
+    balloonBurst = Controller.getBalloonBurst(flight_number)
+    if balloonBurst:
+        data['burst'] = balloonBurst
+
+    balloonStart = Controller.getBalloonStart(flight_number)
+    if balloonStart:
+        data['start'] = balloonStart
 
     # balloonLanding = getBalloonLanding()
 
     # balloonTelemetry = getActualTelemetry()
 
-    if (debug()):
-        print "Sending data: "
-        print data
+    LOG.debug("Sending data: ", data)
 
     return render_template("index.html", async_mode=socketio.async_mode, balloon_data=data)
 
 
-# ------ API -------
+@app.route('/admin/flight')
+def flight_administration():
+    flights = Controller.getFlightAll()
+    return render_template("show_flights.html", flights=flights)
 
-def authenticate(auth_hash):
-    # TODO
-    return False
 
-# Deprecated
-@app.route('/api/update', methods=['POST'])
-def api_update():
-    if request.method == 'POST':
-        print("POST request")
-        json_request = request.get_json(force=False, silent=False, cache=False)
-        # TODO Not a JSON Exception
+@app.route('/admin/flight/add', methods=['POST'])
+def add_flight():
+    if not request.method == 'POST':
+        abort(405)
 
-        if json_request.has_key("pass"):
-            print "Has key"
-            auth_hash = json_request["pass"]
-            authenticated = authenticate(auth_hash)
-            if (not authenticated):
-                print "Not authenticated."
-                return "Not authenticated.", 401
-        else:
-            print "Not authenticated."
-            return "Not authenticated.", 401
-
-        if json_request["type"] == "updateLocation":
-            data = {}
-            data["type"] = "baloonLocation"
-            data["timestamp"] = json_request["data"]["timestamp"]
-            data["location"] = {}
-            data["location"]["lat"] = json_request["data"]["location"]["lat"]
-            data["location"]["lng"] = json_request["data"]["location"]["lng"]
-            json_data = json.dumps(data)
-            socketio.emit("baloon_update", json_data, namespace="/map")
-            return "Data updated."
+    if request.form['flightStartDate'] is not None and request.form['flightNumber'] is not None:
+        # flash("Flight saved.")
+        Controller.saveNewFlight(request.form['flightNumber'], request.form['flightStartDate'])
     else:
-        print("GET request")
-        print(request)
+        LOG.debug("Wrong input parameters for new Flight")
 
+    return redirect(url_for('flight_administration'))
+
+
+@app.route('/admin/flight/<int:flight_id>/detail')
+def flight_detail(flight_id):
+    # TODO Change flight id to flight number
+    flight = Controller.getFlightById(flight_id)
+
+    parameters = None
+    parameters = Controller.getParametersAllByFlight(flight_id)
+    events = Controller.getEventsAllByFlight(flight_id)
+
+    return render_template("show_flight_detail.html", parameters=parameters, flight=flight, events=events)
+
+
+@app.template_filter('format_datetime')
+def jinja2_filter_datetime(date, format=None):
+    DEFAULT_FORMAT = "%d.%m.%Y %H:%M:%S"
+    if format:
+        return date.strftime(format)
+    else:
+        return date.strftime(DEFAULT_FORMAT)
+
+
+@app.template_filter('from_timestamp')
+def jinja2_filter_datetime(timestamp, format=None):
+    DEFAULT_FORMAT = "%d.%m.%Y %H:%M:%S"
+    date = datetime.fromtimestamp(timestamp)
+    if format:
+        return date.strftime(format)
+    else:
+        return date.strftime(DEFAULT_FORMAT)
+
+
+# ------ API -------
 
 @app.route('/api/dumb_json', methods=['POST'])
 def api_dumbjson():
     if request.method == 'POST':
-        print("POST request")
+        LOG.info("POST request")
         json_request = json.dumps(request.get_json(force=False, silent=False, cache=False))
-        print(json_request)
+        LOG.debug(json_request)
         socketio.emit("baloon_update", json_request, namespace="/map")
         return "Data sent."
+
 
 @app.route('/api/mirror', methods=['POST'])
 def api_mirror():
     if request.method == 'POST':
-        return jsonify(request.get_json(force=False, silent=False, cache=False)), 202
+        # LOG.debug("API MIRROR: {}".format(request.get_json(force=False, silent=False, cache=False)))
+        return jsonify(request.get_json(force=False, silent=False, cache=False))
+
+@app.route('/api/test', methods=['GET', 'POST'])
+def api_test():
+    LOG.debug("API TEST")
+    return "TEST", 202
+
+
+@app.route('/api/flight/<int:flight_number>/telemetry', methods=['POST'])
+def api_telemetry(flight_number):
+    if request.method != 'POST':
+        abort(405)
+
+    json_request = request.get_json(force=False, silent=False, cache=False)
+    if not json_request.has_key("flightHash"):
+        abort(400)
+
+    flightHash = json_request["flightHash"]
+    if not Controller.authenticate(flight_number, flightHash):
+        abort(401)
+
+    if json_request.has_key("data"):
+        LOG.info("Telemetry data accepted")
+        # Controller.checkTelemetryJsonData(json_request["data"])
+        Controller.saveNewParameters(flight_number, json_request["data"])
+        # WebController.refreshSite(flight_number)
+        # SocialController.postStatuses(altitude,timestamp)
+
+    return "OK", 201
+
+
+@app.route('/api/flight/<int:flight_number>/event/<string:event>', methods=['POST'])
+def api_events(flight_number, event):
+    if request.method != 'POST':
+        abort(405)
+
+    if not Controller.isValidEvent(event):
+        abort(400)
+
+    json_request = request.get_json(force=False, silent=False, cache=False)
+    if not json_request.has_key("flightHash"):
+        abort(400)
+
+    flightHash = json_request["flightHash"]
+    if not Controller.authenticate(flight_number, flightHash):
+        abort(401)
+
+    if json_request.has_key("data"):
+        # Controller.checkEventJsonData(json_request["data"])
+        Controller.saveNewEvent(flight_number,event,json_request["data"])
+        # WebController.refreshSite(flight_number)
+
+    return "OK", 201
+
 
 # -------- SOCKETS ---------
 
@@ -127,30 +186,18 @@ def sendMessage():
 
 @socketio.on('connect', namespace='/socket/')
 def test_connect():
-    print("Connected.")
+    LOG.info("Connected.")
     emit('message', {'data': 'Connected to Socket'})
-    print("Message sent.")
-
-
-thread = None
+    LOG.debug("Message sent.")
 
 
 @socketio.on('connect', namespace='/map')
-def baloonUpdate():
-    print("Client connected");
-    emit('message', {'data': 'Client connected'})
+def balloonUpdate():
+    LOG.info("Client connected")
+    emit('message', {'data': '[Server]: You have been connected.'})
     global thread
 
 
-# if thread is None:
-# thread = socketio.start_background_task(target=background_thread)
-
-messageType = ["baloonLocation", "baloonStart", "baloonBurst", "baloonLanding", "baloonPathUpdate"]
-
-
-def background_thread():
-    while True:
-        socketio.sleep(5)
-        i = random.randint(0, len(messageType) - 1)
-        print("Sending " + messageType[i])
-        socketio.emit('baloon_update', {'type': messageType[i]}, namespace="/map")
+def init_db():
+    from models import Flight, Parameter, Value, Event
+    db.create_all()

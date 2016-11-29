@@ -5,6 +5,11 @@ flask
 flask_socketio
 flask_sqlalchemy
 
+# ----------------------
+# Social Propagation
+# ----------------------
+tweepy
+facebook-sdk
 
 # ----------------------
 # Testing

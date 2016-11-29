@@ -1,0 +1,40 @@
+/* General */
+
+#flight_wrapper {
+	width: 50%;
+	margin: 0 auto;
+}
+/* For show_flight_detail.html */
+#flight_detail {
+	margin: 50px 0;
+	border-bottom: 1px solid #ccc;
+}
+
+.flight_parameters table {
+    width: 100%
+}
+
+.flight_parameters table tr:nth-child(odd){
+	background-color: #eee;
+}
+
+.flight_parameters tr {
+    margin: 5px 10px;
+}
+
+.flight_parameters td {
+    padding: 5px;
+}
+
+/* For show_flights.html */
+#flights_table {
+	width: 100%;
+}
+
+#flights_table tr:nth-child(odd) {
+	background-color: #eee
+}
+
+#flights_add {
+	margin: 50px auto
+}
