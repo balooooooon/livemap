@@ -6,5 +6,7 @@
 # Virtual enviroment dir
 balon/venv/
 .idea/
+
+# Logs
 balon/balooooooon.log
-*.sqlite3
+*.log
