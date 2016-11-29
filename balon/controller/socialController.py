@@ -1,11 +1,12 @@
+@@ -0,0 +1,41 @@
 from balon import app, LOG
 import facebook
 import tweepy
 
 
 
-MSG_FACEBOOK = "Nas balon sa prave nachadza vo vyske {}"
-MSG_TWITTER = "Nas balon sa prave nachadza vo vyske {}"
+MSG_FACEBOOK = "Náš balón sa práve nachádza vo výške {}"
+MSG_TWITTER = "Náš balón sa práve nachádza vo výške {}"
 
 def getTwitterApi():
     auth = tweepy.OAuthHandler(app.config['TWITTER_CONSUMER_KEY'], app.config['TWITTER_CONSUMER_SECRET'])
@@ -20,7 +21,7 @@ def getFacebookApi():
 def postFacebookStatus(altitude):
     api = getFacebookApi()
     LOG.info("Facebook API loaded")
-    status = graph.put_wall_post(message=MSG_FACEBOOK.format(altitude))
+    status = graph.put_wall_post(message=MSG_FACEBOOK.format(altitude)))
     #TODO exception logging & handling
 
 def postTwitterStatus(altitude):
