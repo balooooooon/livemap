@@ -4,8 +4,8 @@ import tweepy
 
 
 
-MSG_FACEBOOK = "N� bal�n sa pr�ve nach�dza vo v��ke {}"
-MSG_TWITTER = "N� bal�n sa pr�ve nach�dza vo v��ke {}"
+MSG_FACEBOOK = "Nas balon sa prave nachadza vo vyske {}"
+MSG_TWITTER = "Nas balon sa prave nachadza vo vyske {}"
 
 def getTwitterApi():
     auth = tweepy.OAuthHandler(app.config['TWITTER_CONSUMER_KEY'], app.config['TWITTER_CONSUMER_SECRET'])
