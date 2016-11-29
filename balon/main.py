@@ -121,9 +121,8 @@ def api_dumbjson():
 @app.route('/api/mirror', methods=['POST'])
 def api_mirror():
     if request.method == 'POST':
-        LOG.debug("API MIRROR: %s", jsonify(request.get_json(force=False, silent=False, cache=False)))
-        return jsonify(request.get_json(force=False, silent=False, cache=False)), 202
-
+        # LOG.debug("API MIRROR: {}".format(request.get_json(force=False, silent=False, cache=False)))
+        return jsonify(request.get_json(force=False, silent=False, cache=False))
 
 @app.route('/api/test', methods=['GET', 'POST'])
 def api_test():
