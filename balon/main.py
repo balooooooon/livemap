@@ -158,8 +158,8 @@ def api_events(flight_number, event):
     if request.method != 'POST':
         abort(405)
 
-    if not Controller.isValidEvent(event):
-        abort(400)
+    #if not Controller.isValidEvent(event):
+    #    abort(400)
 
     json_request = request.get_json(force=False, silent=False, cache=False)
     if not json_request.has_key("flightHash"):

@@ -55,21 +55,27 @@ def getBalloonStart(flight_number):
 
 
 def getBalloonBurst(flight_number):
-    location = None
+    position = None
 
-    if app.config['NO_DB']:
-        timestamp = 1477866660
+    flight = service.getFlightByNumber(flight_number)
+    events = service.getEventsByFlight(flight.id)
 
-        location = {
-            'type': "burst",
-            'point': {
-                'time': timestamp,
-                'lat': 48.687088,
-                'lng': 19.667122
+    for e in events:
+        if e.type == "burst":
+            service.fillParametersDictionary(e)
+            parameter = e.parametersDict["position"]
+            position = {
+                'type': "burst",
+                'point': {
+                    'time': parameter.time_received,
+                    'lat': parameter.valuesDict["lat"].value,
+                    'lng': parameter.valuesDict["lng"].value
+                }
             }
-        }
 
-    return None
+    LOG.debug("BalloonBurst: ", position)
+
+    return position
 
 
 def getBalloonPath(flight_number):
