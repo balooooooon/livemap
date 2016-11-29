@@ -4,8 +4,8 @@ import tweepy
 
 
 
-MSG_FACEBOOK = "Nas balon sa prave nachadza vo vyske {}"
-MSG_TWITTER = "Nas balon sa prave nachadza vo vyske {}"
+MSG_FACEBOOK = "N� bal�n sa pr�ve nach�dza vo v��ke {}"
+MSG_TWITTER = "N� bal�n sa pr�ve nach�dza vo v��ke {}"
 
 def getTwitterApi():
     auth = tweepy.OAuthHandler(app.config['TWITTER_CONSUMER_KEY'], app.config['TWITTER_CONSUMER_SECRET'])
@@ -26,15 +26,10 @@ def postFacebookStatus(altitude):
 def postTwitterStatus(altitude):
     api = getTwitterApi()
     LOG.info("Twitter API loaded")
-    status = api.update_status(status=MSG_TWITTER.format(altitude)) 
+    status = api.update_status(status=MSG_TWITTER.format(altitude))
     #TODO exception logging & handling
 
 def postStatuses(altitude,timestamp):
     if ((end - start).total_seconds()) > 60 :
         postFacebookStatus(altitude)
         postTwitterStatus(altitude)
-
-
-
-
-

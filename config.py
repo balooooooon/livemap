@@ -1,5 +1,6 @@
 import os
 import logging
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -37,8 +38,8 @@ class Config(object):
 
 class ProductionConfig(Config):
     DEBUG = False
-    #SQLALCHEMY_DATABASE_URI = 'sqlite:////users.sqlite3'
-    LOGGING_LOCATION = "/var/log/flask/balon.log"
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////var/www/balon/balon.sqlite3'
+    LOGGING_LOCATION = "/var/log/balon/balooooooon.log"
     LOGGING_LEVEL = logging.ERROR
 
     LOGGING_CONSOLE = False
@@ -60,6 +61,7 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_RECORD_QUERIES = True
 
     APP_AUTHENTICATE_FLIGHT = False
+
 
 class TestingConfig(Config):
     TESTING = True

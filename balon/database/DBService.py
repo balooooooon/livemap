@@ -91,13 +91,13 @@ def getParametersByKeyByFlight(key, value, flight_id):
 
 def getParameterLastByFlight(key, value, flight_id):
     q = {key: value, 'flight_id': flight_id}
-    parameter = Parameter.query.filter_by(**q).order_by(Parameter.time_received.desc()).first()
+    parameter = Parameter.query.filter_by(**q).order_by(Parameter.time_created.desc()).first()
     return parameter
 
 
 def getParameterFirstByFlight(key, value, flight_id):
     q = {key: value, 'flight_id': flight_id}
-    parameter = Parameter.query.filter_by(**q).order_by(Parameter.time_received.asc()).first()
+    parameter = Parameter.query.filter_by(**q).order_by(Parameter.time_created.asc()).first()
     return parameter
 
 
