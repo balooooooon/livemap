@@ -10,3 +10,4 @@ balon/venv/
 # Logs
 balon/balooooooon.log
 *.log
+*.sqlite3
