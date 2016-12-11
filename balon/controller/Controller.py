@@ -210,3 +210,16 @@ def parseHTMLDateTimeToTimestamp(date):
     HTML_DATETIME_FORMAT = "%Y-%m-%dT%H:%M"
     timestamp = time.mktime(datetime.datetime.strptime(date, HTML_DATETIME_FORMAT).timetuple())
     return timestamp
+
+
+def flightExists(flight_number):
+    """
+    Checks if Flight with requested Flgiht Number exists in Database
+    @param flight_number: Flight Number
+    @return: boolean
+    """
+    flight = service.getFlightByNumber(flight_number)
+    if flight is Flight:
+        return True
+    else:
+        return False

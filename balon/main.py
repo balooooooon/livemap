@@ -22,11 +22,22 @@ LOG.debug("Starting flask app main.py")
 def balloonDashboard():
     # balloonStatus =
 
-    flight_number = 42
-    # if request.args["flight"]:
-    #     flight_number = request.args["flight"]
-    # else:
-    #     flight_number = 42
+    # TODO Try/catch encode() and int()
+    if request.args.has_key("flight"):
+        num = request.args.get("flight")
+        num = num.encode('ascii','ignore')
+        if num.isdigit():
+            flight_number = int(num)
+            LOG.debug("Custom flight number: %d", flight_number)
+        else:
+            LOG.debug("Custom flight number: %d - Wrong variable", num)
+            flight_number = 42
+    else:
+        flight_number = 42
+
+    if Controller.flightExists(flight_number):
+        # TODO Error message if Flight does not exists
+        flight_number = 42
 
     data = {}
 

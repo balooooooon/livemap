@@ -8,7 +8,7 @@
 <body>
 	<div id="flight_wrapper">
 
-		<form id="flights_add" method="post" action="/admin/flight/add">
+		<form id="flights_add" method="post" action="/balon/admin/flight/add">
 			Flight Number:<br>
 			<input type="text" name="flightNumber"><br>
 			Start Date:<br>
@@ -28,10 +28,10 @@
 			{% for flight in flights %}
 				<tr>
 					<td>{{ flight.id }}</td>
-					<td><a href="/admin/flight/{{flight.id}}/detail">{{ flight.number }}</a></td>
+					<td><a href="/balon{{ url_for('flight_detail',flight_id=flight.id) }}">{{ flight.number }}</a></td>
 					<td>{{ flight.hash }}</td>
 					<td>{{ flight.start_date|format_datetime }}</td>
-					<td><a href="/admin/flight/{{flight.id}}/delete">X</a></td>
+					<td><a href="/balon/admin/flight/{{flight.id}}/delete">X</a></td>
 				</tr>
 			{% endfor %}
 			</table>
