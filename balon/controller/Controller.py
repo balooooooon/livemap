@@ -192,6 +192,15 @@ def getFlightAll():
     return flights
 
 
+def getFlightList():
+    """
+    Returns list of all flights
+    @return: array - list of flights
+    """
+    flightList = service.getFlightList()
+    return flightList
+
+
 def parseHTMLDateTimeToDateTime(date):
     """
     Thanks to:

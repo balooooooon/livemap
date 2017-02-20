@@ -38,6 +38,19 @@ def getFlightAll():
     return flights
 
 
+def getFlightList():
+    """
+    Return list of all flights, their ID, number and start_date
+    @return: array - array of all flights
+    """
+    flights = dao.getFlightAll()
+    flightList = []
+    for flight in flights:
+        f = {"id": flight.id, "number": flight.number, "start_date": flight.start_date}
+        flightList.append(f)
+    return flightList
+
+
 def computeHash(number):
     m = hashlib.md5()
     m.update(number)
