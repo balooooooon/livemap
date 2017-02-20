@@ -193,7 +193,11 @@
       <label style="font-size:24px">Let:</label>
         <select id="flightPicker" onchange="self.location=self.location.origin+self.location.pathname+'?flight='+this.selectedOptions[0].value">
           {% for flight in balloon_data.flightList %}
-            <option value="{{ flight.number }}">{{ flight.number }}</option>
+            {% if flight.number|string() == request.args.get('flight')|string() %}
+              <option value="{{ flight.number }}" selected>{{ flight.number }}</option>
+            {% else %}
+              <option value="{{ flight.number }}">{{ flight.number }}</option>
+            {% endif %}
           {% endfor %}
         </select>
       </div>
