@@ -20,14 +20,15 @@ def getBalloonLocation(flight_number):
     # flight = service.getFlightByNumber(flight_number)
     parameter = service.getFlightLastPosition(flight_number)
 
-    position = {
-        'type': "current",
-        'point': {
-            'time': parameter.time_received,
-            'lat': parameter.valuesDict["lat"].value,
-            'lng': parameter.valuesDict["lng"].value
+    if parameter is not None:        
+        position = {
+            'type': "current",
+            'point': {
+                'time': parameter.time_received,
+                'lat': parameter.valuesDict["lat"].value,
+                'lng': parameter.valuesDict["lng"].value
+            }
         }
-    }
 
     LOG.debug("BalloonLocation: ", position)
 
@@ -39,15 +40,16 @@ def getBalloonStart(flight_number):
 
     # flight = service.getFlightByNumber(flight_number)
     parameter = service.getFlightFirstPosition(flight_number)
-
-    position = {
-        'type': "start",
-        'point': {
-            'time': parameter.time_received,
-            'lat': parameter.valuesDict["lat"].value,
-            'lng': parameter.valuesDict["lng"].value
+    
+    if parameter is not None:
+        position = {
+            'type': "start",
+            'point': {
+                'time': parameter.time_received,
+                'lat': parameter.valuesDict["lat"].value,
+                'lng': parameter.valuesDict["lng"].value
+            }
         }
-    }
 
     LOG.debug("BalloonStart: ", position)
 
@@ -79,7 +81,6 @@ def getBalloonBurst(flight_number):
 
 
 def getBalloonPath(flight_number):
-    position = None
 
     # flight = service.getFlightByNumber(flight_number)
     parameters = service.getFlightPath(flight_number)
