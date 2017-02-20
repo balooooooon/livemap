@@ -22,4 +22,4 @@ class Flight(db.Model):
         self.start_date = date
 
     def __str__(self):
-        return '<Flight [%d] [%d] %d / %s  >' % (self.id, self.start_date, self.number, self.hash)
+        return '<Flight [%d] [%s] %d / %s  >' % (self.id, str(self.start_date), self.number, self.hash)
