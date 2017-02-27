@@ -57,6 +57,10 @@ def balloonDashboard():
     if balloonStart:
         data['start'] = balloonStart
 
+    flightList = Controller.getFlightList()
+    if flightList:
+        data['flightList'] = flightList
+
     # balloonLanding = getBalloonLanding()
 
     # balloonTelemetry = getActualTelemetry()
