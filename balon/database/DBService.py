@@ -21,6 +21,13 @@ handler.setLevel(app.config['LOGGING_LEVEL'])
 LOG.addHandler(handler)
 LOG.setLevel(logging.DEBUG)
 
+if (app.config['LOGGING_CONSOLE_DB']):
+    streamHandler = logging.StreamHandler()
+    streamHandler.setLevel(app.config['LOGGING_LEVEL_CONSOLE'])
+    streamHandler.setFormatter(formatter)
+    # app.logger.addHandler(streamHandler)
+    LOG.addHandler(streamHandler)
+
 
 # -------------------------
 #      Flight
