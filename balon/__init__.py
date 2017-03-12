@@ -1,6 +1,7 @@
 # ----------------- IMPORTS -----------------
 
 # Flask imports
+import MySQLdb
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
@@ -55,6 +56,12 @@ socketio = SocketIO(app, async_mode=async_mode)
 LOG.debug("Starting flask app __init__.py")
 
 db = SQLAlchemy(app)
+
+mysql = MySQLdb.connect(app.config["MYSQL_DATABASE_HOST"],
+                        app.config["MYSQL_DATABASE_USER"],
+                        app.config["MYSQL_DATABASE_PASSWORD"],
+                        app.config["MYSQL_DATABASE_DB"])
+
 # db.create_all()
 # TODO Test Database connection
 

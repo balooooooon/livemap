@@ -12,10 +12,14 @@ tweepy
 facebook-sdk
 
 # ----------------------
+# Database
+# ----------------------
+MySQL-python
+
+# ----------------------
 # Testing
 # ----------------------
 # mock
-
 
 # ----------------------
 # Production Server

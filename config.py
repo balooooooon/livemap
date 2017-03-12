@@ -16,6 +16,14 @@ class Config(object):
     # SQLALCHEMY_DATABASE_URI = 'sqlite:////dev/TP/server/balon.sqlite3'
     SQLALCHEMY_DATABASE_URI = 'mysql://balon:balon@localhost/balon_test'
 
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:////dev/TP/server/balon.sqlite3'
+    SQLALCHEMY_DATABASE_URI = 'mysql://balon:balon@localhost/balon_test'
+
+    MYSQL_DATABASE_USER = "balon"
+    MYSQL_DATABASE_PASSWORD = "balon"
+    MYSQL_DATABASE_DB = "balon_live"
+    MYSQL_DATABASE_HOST = "localhost"
+    MYSQL_CURSORCLASS = "SSDictCursor"
 
 
     LOGGING_LOGGER = "Balon Logger"
@@ -53,6 +61,11 @@ class DevelopConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://balon:balon@localhost/balon_test'
     #SQLALCHEMY_DATABASE_URI = 'sqlite:////dev/TP/server/balon.sqlite3' 
 
+    MYSQL_DATABASE_USER = "balon"
+    MYSQL_DATABASE_PASSWORD = "balon"
+    MYSQL_DATABASE_DB = "balon_live"
+    MYSQL_DATABASE_HOST = "localhost"
+    MYSQL_CURSORCLASS = "SSDictCursor"
 
     # -- LOGGERS
     LOGGING_LOCATION = "/var/log/balon/balon-dev.log"
@@ -82,7 +95,12 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://balon:balon@localhost/balon_test'
     #SQLALCHEMY_DATABASE_URI = 'sqlite:////var/www/balon/balon.sqlite3'
     
-    
+    #MYSQL_DATABASE_USER = "balon"
+    #MYSQL_DATABASE_PASSWORD = "balon"
+    #MYSQL_DATABASE_DB = "balon_live"
+    #MYSQL_DATABASE_HOST = "localhost"
+    #MYSQL_CURSORCLASS = "SSDictCursor"
+
     # -- LOGGERS
     LOGGING_LOCATION = "/var/log/balon/balon.log"
     LOGGING_LEVEL = logging.ERROR
