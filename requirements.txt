@@ -12,14 +12,17 @@ tweepy
 facebook-sdk
 
 # ----------------------
+# Database
+# ----------------------
+MySQL-python
+
+# ----------------------
 # Testing
 # ----------------------
 # mock
 
-
 # ----------------------
 # Production Server
 # ----------------------
-
-# Using Apache with mod_wsgi instead
-# gunicorn
+gunicorn
+eventlet
