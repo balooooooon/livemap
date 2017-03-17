@@ -38,6 +38,19 @@ def getFlightAll():
     return flights
 
 
+def getFlightList():
+    """
+    Return list of all flights, their ID, number and start_date
+    @return: array - array of all flights
+    """
+    flights = dao.getFlightAll()
+    flightList = []
+    for flight in flights:
+        f = {"id": flight.id, "number": flight.number, "start_date": flight.start_date}
+        flightList.append(f)
+    return flightList
+
+
 def computeHash(number):
     m = hashlib.md5()
     m.update(number)
@@ -116,8 +129,6 @@ def getParametersWithValuesByFlight(flight_id):
     return parameters
 
 
-
-
 def getEventsByFlight(flight_id):
     events = dao.getEventsByFlight(flight_id)
     for e in events:
@@ -126,6 +137,7 @@ def getEventsByFlight(flight_id):
             fillValuesDictionary(p)
 
     return events
+
 
 # -------------------------
 #      Object creation
@@ -158,15 +170,16 @@ def getValueObject(v):
 def getFlightLastPosition(flight_number):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameter = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
-    LOG.debug(parameter)
-    fillValuesDictionary(parameter)
+    if parameter is not None:
+        fillValuesDictionary(parameter)
     return parameter
 
 
 def getFlightFirstPosition(flight_number):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameter = dao.getParameterFirstByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
-    fillValuesDictionary(parameter)
+    if parameter is not None:
+        fillValuesDictionary(parameter)
     return parameter
 
 
@@ -175,18 +188,21 @@ def getFlightPath(flight_number):
     parameters = dao.getParametersByKeyByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
     for p in parameters:
         fillValuesDictionary(p)
-
     return parameters
 
 
 def fillValuesDictionary(p):
+    if p is None:
+        raise TypeError("Parameter is Null")
     p.valuesDict = {}
     for v in p.values:
         p.valuesDict[v.name] = v
 
+
 def fillParametersDictionary(e):
+    if e is None:
+        raise TypeError("Parameter is Null")
     e.parametersDict = {}
     for p in e.parameters:
         fillValuesDictionary(p)
         e.parametersDict[p.type] = p
-

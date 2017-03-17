@@ -143,7 +143,7 @@
       var socket = io.connect(socketURL);
 
       socket.on('connect', function() {
-        console.log("connected")
+        console.log("connected");
           socket.emit('my_event');
       });
       
@@ -187,6 +187,21 @@
     async defer></script>
   </div>
   <div id="sidePanelWrapper">
+
+    <div class="telemetry-card-flightPicker telemetry-card  mdl-card mdl-shadow--2dp ">
+      <div class="md1-card__supporting-text">
+      <label style="font-size:24px">Let:</label>
+        <select id="flightPicker" onchange="self.location=self.location.origin+self.location.pathname+'?flight='+this.selectedOptions[0].value">
+          {% for flight in balloon_data.flightList %}
+            {% if flight.number|string() == request.args.get('flight')|string() %}
+              <option value="{{ flight.number }}" selected>{{ flight.number }}</option>
+            {% else %}
+              <option value="{{ flight.number }}">{{ flight.number }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+    </div>
 
     <div class="telemetry-card mdl-card mdl-shadow--2dp">
       <div class="mdl-card__title">
