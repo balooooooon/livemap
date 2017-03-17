@@ -1,30 +1,28 @@
-from balon import db
+from flask import json
 
+class Event(object):
 
-class Event(db.Model):
-    joinTable = db.Table("param_event",
-                         db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
-                         db.Column('parameter_id', db.Integer, db.ForeignKey('parameter.id'))
-                         )
+    event_id_DB = "id"
+    event_type_DB = "type"
+    event_flight_id_DB = "flight_id"
+    event_time_created_DB = "time_created"
 
-    class ValueEntry:
-        TABLE_NAME = "event"
+    def __init__(self,*args,**kwargs):
+        if kwargs.has_key("fromDB"):
+            fromDB = kwargs["fromDB"]
+            self.id = fromDB["id"]
+            self.type = fromDB["type"]
+            self.flight_id = fromDB["flight_id"]
+            self.time_created = fromDB["time_created"]
+        else:
+            self.id = None
+            self.type = None
+            self.flight_id = None
+            self.time_created = None
 
-        KEY_ID = "id"
-        KEY_TYPE = "type"
-        KEY_TIME_CREATED = "time_created"
-        KEY_FLIGHT_ID = "flight_id"
+    def __str__(self):
+        return '<Event [%d] [%s] %d / Flight id - %s  >' % (self.id, str(self.time_created), self.type, self.flight_id)
 
-    id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(20))
-    time_created = db.Column(db.DateTime)
-    parameters = db.relationship('Parameter', secondary=joinTable,
-                                 backref=db.backref('parameter', lazy='dynamic'))
-
-    flight_id = db.Column(db.Integer, db.ForeignKey("flight.id"))
-
-
-    def __init__(self, type, time_created):
-        self.type = type
-        self.time_created = time_created
-        self.parametersDict = None
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__,
+                      sort_keys=True, indent=4)
