@@ -90,6 +90,11 @@ def add_flight():
     return redirect(url_for('flight_administration'))
 
 
+@app.route('/admin/flight/<int:flight_id>/delete')
+def delete_flight(flight_id):
+    abort(501)
+
+
 @app.route('/admin/flight/<int:flight_id>/detail')
 def flight_detail(flight_id):
     # TODO Change flight id to flight number
