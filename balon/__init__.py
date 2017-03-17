@@ -10,16 +10,9 @@ import logging
 
 app = Flask(__name__)
 
-# import sys
-# path = "/var/www/balon/" + __name__ + "/"
-# print path
-# sys.path.insert(0,path)
-
-# sys.path.insert(0,"C:\\dev\\TP\\server\\balon")
-
 # http://stackoverflow.com/questions/15603240/flask-how-to-manage-different-environment-databases
 # Nacita config zo suboru config.py
-app.config.from_object('config.DevelopConfig')
+app.config.from_object('config.ProductionConfig')
 
 # Ak je vytvorena premenna prostredia BALLOON_CONFIG, prepise config vyssie
 app.config.from_envvar('BALLOON_CONFIG', silent=True)
@@ -47,7 +40,7 @@ if (app.config['LOGGING_CONSOLE']):
 
 LOG.setLevel(logging.DEBUG)
 
-LOG.debug("Database Path: %s", app.config["DATABASE"])
+# LOG.debug("Database Path: %s", app.config["DATABASE"])
 
 async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
@@ -55,12 +48,6 @@ socketio = SocketIO(app, async_mode=async_mode)
 LOG.debug("Starting flask app __init__.py")
 
 db = SQLAlchemy(app)
-# db.create_all()
-# TODO Test Database connection
-
-# from models import Event,Value,Parameter,Flight
-
-# import balon.database.DBConnector
 
 import main
 

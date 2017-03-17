@@ -36,7 +36,6 @@ def getFlightById(flight_id):
 def getFlightAll():
     LOG.info("Query for all flights with ")
     flight =  Flight.query.all()
-    LOG.info(get_debug_queries()[0])
     return flight
 
 def saveFlight(flight):
