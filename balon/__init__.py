@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 # http://stackoverflow.com/questions/15603240/flask-how-to-manage-different-environment-databases
 # Nacita config zo suboru config.py
-app.config.from_object('config.ProductionConfig')
+app.config.from_object('config.DevelopConfig')
 
 # Ak je vytvorena premenna prostredia BALLOON_CONFIG, prepise config vyssie
 app.config.from_envvar('BALLOON_CONFIG', silent=True)
