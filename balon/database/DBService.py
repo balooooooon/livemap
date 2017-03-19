@@ -1,9 +1,12 @@
 import logging
+from contextlib import closing
 
+import MySQLdb
 from flask_sqlalchemy import get_debug_queries
 
 from balon import db
 from balon import app
+from balon import mysql
 
 from balon.models.Flight import Flight
 from balon.models.Parameter import Parameter
