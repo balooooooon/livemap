@@ -206,3 +206,39 @@ def fillParametersDictionary(e):
     for p in e.parameters:
         fillValuesDictionary(p)
         e.parametersDict[p.type] = p
+
+
+def getChartTypes(flight_id):
+    parameterTypes = dao.getParameterTypes(flight_id)
+    LOG.debug(parameterTypes)
+
+    if parameterTypes is not None:
+        for p in parameterTypes:
+            LOG.debug(p)
+            p["values"] = {}
+            val = dao.getValueTypesByParameter(flight_id, p["type"])
+            LOG.debug(val)
+            p["values"] = val
+
+        return parameterTypes
+    else:
+        return None
+
+
+def getChartData(flight_id, value):
+    """
+
+    @param flight_id:
+    @param value:
+    @return: Data or None
+    """
+    data = dao.getParametersByKeyByFlight('value_1.name',value,flight_id) or None
+    result = []
+    for p in data:
+        x = {}
+        x["id"] = p.id
+        x["time_received"] = p.time_received
+        x["time_created"] = p.time_created
+        x["val"] = p.valuesDict[value]
+        result.append(x)
+    return result

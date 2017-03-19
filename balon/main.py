@@ -102,9 +102,21 @@ def flight_detail(flight_id):
 
     parameters = None
     parameters = Controller.getParametersAllByFlight(flight_id)
+
+    charts = Controller.getChartTypes(flight_id)
+    LOG.debug(charts)
+
+    LOG.debug(parameters[3].valuesDict)
+
     events = Controller.getEventsAllByFlight(flight_id)
 
-    return render_template("show_flight_detail.html", parameters=parameters, flight=flight, events=events)
+    import json_tricks
+
+    data = json_tricks.dumps(parameters, primitives=True)
+    # LOG.debug(data)
+
+    return render_template("show_flight_detail.html", parameters=parameters, flight=flight, events=events,
+                           balloonData=data, chartData=charts)
 
 
 @app.template_filter('format_datetime')
@@ -195,6 +207,17 @@ def api_events(flight_number, event):
         # WebController.refreshSite(flight_number)
 
     return "OK", 201
+
+
+@app.route('/api/chart/<int:flight_id>/<string:value>', methods=['POST', 'GET'])
+def api_chart_getValues(flight_id, value):
+    chartData = Controller.getChartData(flight_id, value)
+
+    LOG.debug(chartData)
+
+    import json_tricks
+    data = json_tricks.dumps(chartData, primitives=True)
+    return data
 
 
 # -------- SOCKETS ---------
