@@ -4,13 +4,13 @@
 from datetime import datetime
 
 from flask import Flask, render_template, request, url_for, current_app, jsonify, abort, redirect, flash
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 
 import json
 
 # Controller
-from balon.controller import Controller, WebController, SocialController
-from balon import app, socketio, LOG, db
+from balon.controller import Controller# , WebController, SocialController
+from balon import app, socketio, LOG,  db , observer
 
 # ----------------- IMPORTS -----------------
 from balon.models.Flight import Flight
@@ -163,10 +163,13 @@ def api_telemetry(flight_number):
     if not Controller.authenticate(flight_number, flightHash):
         abort(401)
 
+    flight_id = Controller.getFlightByNumber(flight_number)
+
     if json_request.has_key("data"):
         LOG.info("Telemetry data accepted")
         # Controller.checkTelemetryJsonData(json_request["data"])
         Controller.saveNewParameters(flight_number, json_request["data"])
+        observer.update(flight_id)
         # WebController.refreshSite(flight_number)
         # SocialController.postStatuses(altitude,timestamp)
 
@@ -189,9 +192,12 @@ def api_events(flight_number, event):
     if not Controller.authenticate(flight_number, flightHash):
         abort(401)
 
+    flight_id = Controller.getFlightByNumber(flight_number)
+
     if json_request.has_key("data"):
         # Controller.checkEventJsonData(json_request["data"])
         Controller.saveNewEvent(flight_number,event,json_request["data"])
+        observer.update(flight_id)
         # WebController.refreshSite(flight_number)
 
     return "OK", 201
@@ -217,6 +223,13 @@ def balloonUpdate():
     emit('message', {'data': '[Server]: You have been connected.'})
     global thread
 
+@socketio.on('join', namespace='/map')
+def socket_join(data):
+    LOG.debug(data["flight"])
+    flightNumber = data["flight"]
+    flight_id = Controller.getFlightByNumber(flightNumber)
+    join_room(flight_id)
+    emit('message', {'data': 'Subscribed for flight #{}'.format(flightNumber)})
 
 def init_db():
     from models import Flight, Parameter, Value, Event

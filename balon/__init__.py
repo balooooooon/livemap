@@ -8,6 +8,10 @@ import logging
 
 # ----------------- IMPORTS -----------------
 
+from balon.controller.BalloonObserver import BalloonObserver
+# from balon.controller.SocialController import SocialController
+# from balon.controller.SocketController import SocketController
+
 app = Flask(__name__)
 
 # http://stackoverflow.com/questions/15603240/flask-how-to-manage-different-environment-databases
@@ -48,6 +52,12 @@ socketio = SocketIO(app, async_mode=async_mode)
 LOG.debug("Starting flask app __init__.py")
 
 db = SQLAlchemy(app)
+
+observer = BalloonObserver()
+#socialController = SocialController()
+#socketController = SocketController()
+#observer.register(socialController)
+#observer.register(socketController)
 
 import main
 

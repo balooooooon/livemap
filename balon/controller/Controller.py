@@ -233,3 +233,11 @@ def flightExists(flight_number):
         return True
     else:
         return False
+
+
+def getFlightByNumber(flight_number):
+    flight = service.getFlightByNumber(flight_number)
+    if flight is Flight:
+        return flight.id
+    else:
+        return None
