@@ -3,6 +3,16 @@ from flask import json
 
 class Param(object):
 
+    flight_start_date_DB = "start_date"
+
+    param_type_DB = "type"
+    param_time_received_DB = "time_received"
+    param_time_created_DB = "time_created"
+    param_flight_id_DB = "flight_id"
+    param_source_DB = "source"
+    param_valid_DB = "valid"
+    param_validated_DB = "validated"
+
     def __init__(self,*args,**kwargs):
         if kwargs.has_key("fromDB"):
             fromDB = kwargs["fromDB"]
