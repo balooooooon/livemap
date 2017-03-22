@@ -91,8 +91,9 @@ def saveFlight(flight):
 
         try:
             cur.execute(query)
-        except:     
             app.mysql.commit()
+        except MySQLdb.Error, e:
+            LOG.error(e)
             app.mysql.rollback()
             return False
 
@@ -112,8 +113,9 @@ def updateFlight(flight):
 
         try:
             cur.execute(query)
-        except:     
             app.mysql.commit()
+        except MySQLdb.Error, e:
+            LOG.error(e)
             app.mysql.rollback()
             return False
 
@@ -129,8 +131,9 @@ def deleteFlight(flight):
 
         try:
             cur.execute(query)
-        except:     
             app.mysql.commit()
+        except MySQLdb.Error, e:
+            LOG.error(e)
             app.mysql.rollback()
             return False
 
@@ -179,8 +182,9 @@ def saveParameter(parameter):
 
         try:
             cur.execute(query)
-        except:     
             app.mysql.commit()
+        except MySQLdb.Error, e:
+            LOG.error(e)
             app.mysql.rollback()
             return False
 
