@@ -96,7 +96,7 @@ def saveFlight(flight):
             app.mysql.rollback()
             return False
 
-    return True
+        return cur.lastrowid
 
 
 def updateFlight(flight):
@@ -117,7 +117,8 @@ def updateFlight(flight):
             app.mysql.rollback()
             return False
 
-    return True
+        return cur.lastrowid
+
 
 def deleteFlight(flight):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
@@ -183,11 +184,7 @@ def saveParameter(parameter):
             app.mysql.rollback()
             return False
 
-    return True
-
-    db.session.add(parameter)
-    db.session.commit()
-    return cursor.lastrowid
+        return cur.lastrowid
 
 
 def getParametersByFlight(flight_id):
