@@ -57,7 +57,7 @@ LOG.debug("Starting flask app __init__.py")
 
 db = SQLAlchemy(app)
 
-mysql = MySQLdb.connect(host=app.config["MYSQL_DATABASE_HOST"],
+app.mysql = MySQLdb.connect(host=app.config["MYSQL_DATABASE_HOST"],
                         user=app.config["MYSQL_DATABASE_USER"],
                         passwd=app.config["MYSQL_DATABASE_PASSWORD"],
                         db=app.config["MYSQL_DATABASE_DB"])
