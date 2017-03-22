@@ -10,15 +10,17 @@ class Event(object):
     def __init__(self,*args,**kwargs):
         if kwargs.has_key("fromDB"):
             fromDB = kwargs["fromDB"]
+            if fromDB is None: raise ValueError()
+
             self.id = fromDB["id"]
             self.type = fromDB["type"]
             self.flight_id = fromDB["flight_id"]
             self.time_created = fromDB["time_created"]
         else:
             self.id = None
-            self.type = None
-            self.flight_id = None
-            self.time_created = None
+            self.type = kwargs["type"]
+            self.flight_id = kwargs["flight_id"]
+            self.time_created = kwargs["time_created"]
 
     def __str__(self):
         return '<Event [%d] [%s] %d / Flight id - %s  >' % (self.id, str(self.time_created), self.type, self.flight_id)
