@@ -81,9 +81,11 @@ def saveFlight(flight):
     LOG.info("Query for flight save")
     LOG.debug(flight)
 
-        query = "INSERT INTO flight " \
-                "VALUES ({},{},{})".format(flight.number,flight.hash,flight.start_date)
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+        query = "INSERT INTO flight ({},{},{}) " \
+                "VALUES ('{}','{}','{}')".format(
+            Flight.FlightEntry.KEY_NUMBER, Flight.FlightEntry.KEY_HASH, Flight.FlightEntry.KEY_START_DATE,
+            flight.number, flight.hash, flight.start_date)
 
         LOG.debug(query)
 
@@ -100,8 +102,11 @@ def saveFlight(flight):
 def updateFlight(flight):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "UPDATE flight " \
-                "SET {} = {}, {} = {}, {} = {}" \
-                "WHERE {} = {}".format(Flight.flight_number_DB,flight.number,Flight.flight_hash_DB,flight.hash,Flight.flight_start_date_DB,flight.flight_start_date,Flight.flight_id_DB,flight.id)
+                "SET {} = {}, {} = {}, {} = {} " \
+                "WHERE {} = {}".format(Flight.FlightEntry.KEY_NUMBER, flight.number,
+                                       Flight.FlightEntry.KEY_HASH, flight.hash,
+                                       Flight.FlightEntry.KEY_START_DATE, flight.flight_start_date,
+                                       Flight.FlightEntry.KEY_ID, flight.id)
 
         LOG.debug(query)
 
@@ -138,8 +143,25 @@ def saveEvent(event):
     db.session.add(event)
     db.session.commit()
     return True
+def getEventsByFlight(flight_id):
+        with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+            query = "SELECT * FROM event " \
+                    "WHERE {} = {}".format(Event.EventEntry.KEY_FLIGHT_ID, flight_id)
 
+            LOG.debug(query)
+            cur.execute(query)
 
+            events = []
+            p = cur.fetchone()
+            while True:
+                if p is None:
+                    break
+                event = Event(fromDB=p)
+
+                events.append(event)
+                p = cur.fetchone()
+
+        return events
 # -------------------------
 #      Parameter
 # -------------------------
@@ -314,31 +336,3 @@ def getParameterFirstByFlight(key, value, flight_id):
     return parameter
 
 
-def getEventsByFlight(flight_id):
-
-    LOG.info("Query for all events for flight")
-
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
-        query = "SELECT * FROM event " \
-                "WHERE {} = {}".format(Event.event_id_DB,flight_id)
-
-        LOG.debug(query)
-        cur.execute(query)
-
-        events = []
-        p = cur.fetchone()
-        while True:
-            if p is None:
-                break
-            event = Event(fromDB=p)
-
-            events.append(event)
-            p = cur.fetchone()
-
-    return events
-
-
-#------------------------------------
-    flight = Flight.query.get(flight_id)
-    events = flight.events
-    return events

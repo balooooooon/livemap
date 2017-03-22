@@ -2,10 +2,13 @@ from flask import json
 
 class Event(object):
 
-    event_id_DB = "id"
-    event_type_DB = "type"
-    event_flight_id_DB = "flight_id"
-    event_time_created_DB = "time_created"
+    class EventEntry:
+        TABLE_NAME = "event"
+
+        KEY_ID = "id"
+        KEY_TYPE = "type"
+        KEY_TIME_CREATED = "time_created"
+        KEY_FLIGHT_ID = "flight_id"
 
     def __init__(self,*args,**kwargs):
         if kwargs.has_key("fromDB"):

@@ -1,13 +1,17 @@
 from flask import json
 
+
 class Flight(object):
 
-    flight_number_DB = "number"
-    flight_id_DB = "id"
-    flight_hash_DB = "hash"
-    flight_start_date_DB = "start_date"
+    class FlightEntry:
+        TABLE_NAME = "flight"
 
-    def __init__(self,*args,**kwargs):
+        KEY_ID = "id"
+        KEY_NUMBER = "number"
+        KEY_HASH = "hash"
+        KEY_START_DATE = "start_date"
+
+    def __init__(self, *args, **kwargs):
         if kwargs.has_key("fromDB"):
             fromDB = kwargs["fromDB"]
             if fromDB is None: raise ValueError()
@@ -27,4 +31,4 @@ class Flight(object):
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__,
-                      sort_keys=True, indent=4)
+                          sort_keys=True, indent=4)
