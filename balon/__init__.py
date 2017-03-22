@@ -10,13 +10,6 @@ import logging
 
 app = Flask(__name__)
 
-# import sys
-# path = "/var/www/balon/" + __name__ + "/"
-# print path
-# sys.path.insert(0,path)
-
-# sys.path.insert(0,"C:\\dev\\TP\\server\\balon")
-
 # http://stackoverflow.com/questions/15603240/flask-how-to-manage-different-environment-databases
 # Nacita config zo suboru config.py
 app.config.from_object('config.DevelopConfig')
@@ -47,6 +40,7 @@ if (app.config['LOGGING_CONSOLE']):
 
 LOG.setLevel(logging.DEBUG)
 
+
 async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
 
@@ -59,6 +53,7 @@ app.mysql = MySQLdb.connect(host=app.config["MYSQL_DATABASE_HOST"],
                             db=app.config["MYSQL_DATABASE_DB"])
 
 # TODO Test Database connection
+
 
 import main
 
