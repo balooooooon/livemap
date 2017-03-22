@@ -68,6 +68,7 @@ def saveNewEvent(flight, data, time_received):
     parameters = data['parameters']
 
     event = Event(flight_id=flight.id, type=data['event'], time_created=datetime.fromtimestamp(dt))
+    event.id = dao.saveEvent(event)
 
     for param in parameters:
         type = param['type']
@@ -77,19 +78,21 @@ def saveNewEvent(flight, data, time_received):
         else:
             time_created = datetime.fromtimestamp(dt)
 
-        p = Parameter(type, datetime.fromtimestamp(time_received), time_created)
+        p = Parameter(type=type, time_received=datetime.fromtimestamp(time_received), time_created=time_created, flight_id=flight.id)
+        p.id = dao.saveParameter(p)
+        dao.bindParameterToEvent(p.id, event.id)
 
         inputValues = param['values']
         for key, val in inputValues.iteritems():
             unit = getValueUnit(type)
             val = Value(value=val, unit=unit, name=key)
             p.values[key] = val
+            dao.saveValue(val, p.id)
 
         flight.parameters.append(p)
-        event.parameters.append(p)
+        event.parameters[p.type] = p
 
-    dao.saveFlight(flight)
-    dao.saveEvent(event)
+    # dao.saveFlight(flight)
 
     return True
 
@@ -106,17 +109,21 @@ def saveParameterWithValues(flight, data, time_received):
         else:
             time_created = datetime.fromtimestamp(dt)
 
-        p = Parameter(type, datetime.fromtimestamp(time_received), time_created)
+        p = Parameter(flight_id=flight.id, type=type, time_received=datetime.fromtimestamp(time_received),
+                      time_created=time_created)
+        p.id = dao.saveParameter(p)
 
         inputValues = param['values']
+        LOG.debug(inputValues)
         for key, val in inputValues.iteritems():
             unit = getValueUnit(type)
             val = Value(value=val, unit=unit, name=key)
             p.values[key] = val
+            dao.saveValue(val, p.id)
 
         flight.parameters.append(p)
 
-    dao.saveFlight(flight)
+    # dao.saveFlight(flight)
     return True
 
 
