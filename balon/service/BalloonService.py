@@ -1,4 +1,4 @@
-from balon import app, LOG, db
+from balon import app, LOG
 from balon.database import DBService as dao
 from balon.models.Event import Event
 
