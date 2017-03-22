@@ -160,26 +160,51 @@ def saveEvent(event):
 
         return cur.lastrowid
 
+def bindParameterToEvent(param_id, event_id):
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+        query = "INSERT INTO param_event (parameter_id,event_id) " \
+                "VALUES ('{}','{}')".format(param_id, event_id)
+
+        LOG.debug(query)
+
+        try:
+            cur.execute(query)
+            app.mysql.commit()
+        except MySQLdb.Error, e:
+            LOG.error(e)
+            app.mysql.rollback()
+            return False
+
+        return cur.lastrowid
 
 def getEventsByFlight(flight_id):
-        with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
-            query = "SELECT * FROM event " \
-                    "WHERE {} = {}".format(Event.EventEntry.KEY_FLIGHT_ID, flight_id)
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+        query = "SELECT * FROM event " \
+                "WHERE {} = {}".format(Event.EventEntry.KEY_FLIGHT_ID, flight_id)
 
-            LOG.debug(query)
-            cur.execute(query)
+        LOG.debug(query)
+        cur.execute(query)
 
-            events = []
+        events = []
+        p = cur.fetchone()
+        while True:
+            if p is None:
+                break
+            event = Event(fromDB=p)
+
+            events.append(event)
             p = cur.fetchone()
-            while True:
-                if p is None:
-                    break
-                event = Event(fromDB=p)
 
-                events.append(event)
-                p = cur.fetchone()
+    for e in events:
+        parameters = getParametersByEvent(e.id)
+        e.parameters = {}
+        for p in parameters:
+            e.parameters[p.type] = p
+        LOG.debug(e.parameters)
 
-        return events
+    return events
+
+
 # -------------------------
 #      Parameter
 # -------------------------
@@ -235,7 +260,37 @@ def getParametersByFlight(flight_id):
     return parameters
 
 
-def getParametersByKeyByFlight(key, value, flight_id):
+def getParametersByEvent(event_id):
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+        query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
+                "WHERE parameter.id IN ( SELECT parameter_id FROM param_event WHERE event_id = {} )".format(event_id)
+
+        LOG.debug(query)
+        cur.execute(query)
+
+        parameters = []
+        p = cur.fetchone()
+        while True:
+            if p is None:
+                break
+            param = Parameter(fromDB=p)
+            pid = p["id"]
+
+            while param.id == pid:
+                val = Value(fromDB=p)
+                param.values[val.name] = val
+                p = cur.fetchone()
+                if p is None:
+                    break
+                pid = p["id"]
+
+            parameters.append(param)
+            # p = cur.fetchone()
+
+    return parameters
+
+
+def getParametersByKeyByFlight(key, value, flight_id, order="ASC"):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
                 "WHERE {} = '{}' AND flight_id = {} ORDER BY parameter.id".format(key, value, flight_id)
@@ -314,3 +369,29 @@ def getParameterFirstByFlight(key, value, flight_id):
             pid = p["id"]
 
     return param
+
+
+# -------------------------
+#      Parameter
+# -------------------------
+
+def saveValue(value, parameter_id):
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+        query = "INSERT INTO value ({},{},{},{}) " \
+                "VALUES ('{}','{}','{}','{}')".format(
+            Value.ValueEntry.KEY_NAME, Value.ValueEntry.KEY_VALUE, Value.ValueEntry.KEY_UNIT,
+            Value.ValueEntry.KEY_PARAMETER_ID,
+            value.name, value.value, value.unit, parameter_id)
+
+        LOG.debug(query)
+
+        try:
+            cur.execute(query)
+            app.mysql.commit()
+        except MySQLdb.Error, e:
+            LOG.error(e)
+            app.mysql.rollback()
+            return False
+
+        return cur.lastrowid
+
