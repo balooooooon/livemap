@@ -47,9 +47,9 @@ def getFlightByKey(key, value):
 
 
 def getFlightById(flight_id):
-        query = "SELECT * FROM flight " \
-                "WHERE {} = {} LIMIT 1".format(Flight.flight_id_DB,flight_id)
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+        # query = "SELECT * FROM flight WHERE id = '%s' LIMIT 1"
+        query = "SELECT * FROM flight WHERE id = {} LIMIT 1".format(flight_id)
 
         LOG.debug(query)
         cur.execute(query)
@@ -78,9 +78,6 @@ def getFlightAll():
 
 
 def saveFlight(flight):
-    LOG.info("Query for flight save")
-    LOG.debug(flight)
-
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO flight ({},{},{}) " \
                 "VALUES ('{}','{}','{}')".format(
@@ -138,6 +135,7 @@ def deleteFlight(flight):
             return False
 
     return True
+
 
 # -------------------------
 #      Event
@@ -236,16 +234,11 @@ def getParametersByFlight(flight_id):
 
     return parameters
 
-    flight = Flight.query.get(flight_id)
-    parameters = flight.parameters
-    return parameters
-
 
 def getParametersByKeyByFlight(key, value, flight_id):
-    # q = {key: value, 'flight_id': flight_id}
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
-                "WHERE {} = '{}' AND flight_id = {} ORDER BY parameter.id".format(key,value,flight_id)
+                "WHERE {} = '{}' AND flight_id = {} ORDER BY parameter.id".format(key, value, flight_id)
 
         LOG.debug(query)
         cur.execute(query)
@@ -267,31 +260,15 @@ def getParametersByKeyByFlight(key, value, flight_id):
                 pid = p["id"]
 
             parameters.append(param)
-            # p = cur.fetchone()
 
-    return parameters
-
-    # query = "SELECT * FROM flight WHERE id = 1"
-    query = "SELECT * FROM parameter LEFT OUTER JOIN value AS value_1 ON value_1.parameter_id = parameter.id WHERE type = 'position' AND flight_id = 1"
-    x = cur.execute(query)
-    y = cur.fetchall()
-    # LOG.debug("QUERY: ")
-    LOG.debug(x)
-    LOG.debug(y[0][1])
-    # parameters = Parameter.query.filter_by(**q).order_by(Parameter.time_received).all()
-    # parameters = Parameter.query.filter_by(**q).all()
-    parameters = None
     return parameters
 
 
 def getParameterLastByFlight(key, value, flight_id):
-#    q = {key: value, 'flight_id': flight_id}
-
-#-------------------------------------------------------
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
-                "WHERE {} = '{}' AND flight_id = {}" \
-                "ORDER BY parameter.time_created DESC".format(key,value,flight_id)
+                "WHERE {} = '{}' AND flight_id = {} " \
+                "ORDER BY parameter.time_created DESC".format(key, value, flight_id)
 
         LOG.debug(query)
         cur.execute(query)
@@ -310,23 +287,14 @@ def getParameterLastByFlight(key, value, flight_id):
                 break
             pid = p["id"]
 
-
     return param
-
-#-------------------------------------------------------
-
-    parameter = Parameter.query.filter_by(**q).order_by(Parameter.time_created.desc()).first()
-    return parameter
 
 
 def getParameterFirstByFlight(key, value, flight_id):
-#    q = {key: value, 'flight_id': flight_id}
-
-#-------------------------------------------------------
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
-                "WHERE {} = '{}' AND flight_id = {}" \
-                "ORDER BY parameter.time_created ASC".format(key,value,flight_id)
+                "WHERE {} = '{}' AND flight_id = {} " \
+                "ORDER BY parameter.time_created ASC".format(key, value, flight_id)
 
         LOG.debug(query)
         cur.execute(query)
@@ -345,11 +313,4 @@ def getParameterFirstByFlight(key, value, flight_id):
                 break
             pid = p["id"]
 
-
     return param
-#-------------------------------------------------------
-
-    parameter = Parameter.query.filter_by(**q).order_by(Parameter.time_created.asc()).first()
-    return parameter
-
-
