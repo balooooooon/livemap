@@ -21,10 +21,10 @@ class Value(object):
             self.unit = fromDB["unit"]
             self.name = fromDB["name"]
         else:
-            self.id = kwargs
-            self.value = kwargs["value"]
-            self.unit = kwargs["unit"]
-            self.name = kwargs["name"]
+            self.id = kwargs.get("id",None)
+            self.value = kwargs.get("value",None)
+            self.unit = kwargs.get("unit",None)
+            self.name = kwargs.get("name",None)
 
     def __repr__(self):
         return '<Value [%d] %r = %f>' % (self.id, self.name, self.value)

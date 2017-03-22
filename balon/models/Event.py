@@ -19,11 +19,13 @@ class Event(object):
             self.type = fromDB["type"]
             self.flight_id = fromDB["flight_id"]
             self.time_created = fromDB["time_created"]
+            self.parameters = fromDB.get("parameters",{})
         else:
-            self.id = None
-            self.type = kwargs["type"]
-            self.flight_id = kwargs["flight_id"]
-            self.time_created = kwargs["time_created"]
+            self.id = kwargs.get("id",None)
+            self.type = kwargs.get("type",None)
+            self.flight_id = kwargs.get("flight_id",None)
+            self.time_created = kwargs.get("time_created",None)
+            self.parameters = kwargs.get("parameters",{})
 
     def __str__(self):
         return '<Event [%d] [%s] %d / Flight id - %s  >' % (self.id, str(self.time_created), self.type, self.flight_id)

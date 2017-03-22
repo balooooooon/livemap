@@ -20,11 +20,16 @@ class Flight(object):
             self.number = fromDB["number"]
             self.hash = fromDB["hash"]
             self.start_date = fromDB["start_date"]
+            self.parameters = []
+            self.events = []
         else:
-            self.id = None
-            self.number = kwargs["number"]
-            self.hash = kwargs["hash"]
-            self.start_date = kwargs["start_date"]
+            self.id = kwargs.get("id", None)
+            self.number = kwargs.get("number", None)
+            self.hash = kwargs.get("hash", None)
+            self.start_date = kwargs.get("start_date", None)
+            self.parameters = kwargs.get("parameters",[])
+            self.events = kwargs.get("events", [])
+
 
     def __str__(self):
         return '<Flight [%d] [%s] %d / %s  >' % (self.id, str(self.start_date), self.number, self.hash)

@@ -28,17 +28,17 @@ class Parameter(object):
             self.validated = fromDB["validated"]
             self.time_received = fromDB["time_received"]
             self.time_created = fromDB["time_created"]
-            self.valuesDict = {}
+            self.values = {}
         else:
-            self.id = None
-            self.flight_id = kwargs["flight_id"]
-            self.type = kwargs["type"]
-            self.source = kwargs["source"]
-            self.valid = kwargs["valid"]
-            self.validated = kwargs["validated"]
-            self.time_received = kwargs["time_received"]
-            self.time_created = kwargs["time_created"]
-            self.valuesDict = {}
+            self.id = kwargs.get("id",None)
+            self.flight_id = kwargs.get("flight_id",None)
+            self.type = kwargs.get("type",None)
+            self.source = kwargs.get("source",None)
+            self.valid = kwargs.get("valid",None)
+            self.validated = kwargs.get("validated",None)
+            self.time_received = kwargs.get("time_received",None)
+            self.time_created = kwargs.get("time_created",None)
+            self.values = kwargs.get("values",{})
 
     def __repr__(self):
         return '<Parameter [%d] [F:%d] %r >' % (self.id, self.flight_id, self.type)
