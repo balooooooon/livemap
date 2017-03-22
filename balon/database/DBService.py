@@ -150,8 +150,8 @@ def saveParameter(parameter):
     LOG.info("Query for parameter save")
 
     with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
-        query = "INSERT INTO parameter " \
-                "VALUES ({},{},{},{})".format(flight.id,flight.number,flight.hash,flight.start_date)
+        query = "INSERT INTO parameter ({},{},{},{})" \
+                "VALUES ({},{},{},{})".format(Param.type_DB,Param.time_received_DB,Param.time_created_DB,Param.flight_id_DB,parameter.type,parameter.time_received,parameter.time_created,parameter.flight_id)
 
         LOG.debug(query)
 
