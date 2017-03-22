@@ -1,21 +1,25 @@
 from flask import json
 
 
-class Param(object):
+class Parameter(object):
 
-    flight_start_date_DB = "start_date"
+    class ParameterEntry():
+        TABLE_NAME = "parameter"
 
-    param_type_DB = "type"
-    param_time_received_DB = "time_received"
-    param_time_created_DB = "time_created"
-    param_flight_id_DB = "flight_id"
-    param_source_DB = "source"
-    param_valid_DB = "valid"
-    param_validated_DB = "validated"
+        KEY_ID = "id"
+        KEY_FLIGHT_ID = "flight_id"
+        KEY_TYPE = "type"
+        KEY_SOURCE = "source"
+        KEY_VALID = "valid"
+        KEY_VALIDATED = "validated"
+        KEY_TIME_RECEIVED = "time_received"
+        KEY_TIME_CREATED = "time_created"
 
     def __init__(self,*args,**kwargs):
         if kwargs.has_key("fromDB"):
             fromDB = kwargs["fromDB"]
+            if fromDB is None: raise ValueError()
+
             self.id = fromDB["id"]
             self.flight_id = fromDB["flight_id"]
             self.type = fromDB["type"]
@@ -27,13 +31,13 @@ class Param(object):
             self.valuesDict = {}
         else:
             self.id = None
-            self.flight_id = None
-            self.type = args[0]
-            self.source = None
-            self.valid = None
-            self.validated = None
-            self.time_received = args[1]
-            self.time_created = args[2]
+            self.flight_id = kwargs["flight_id"]
+            self.type = kwargs["type"]
+            self.source = kwargs["source"]
+            self.valid = kwargs["valid"]
+            self.validated = kwargs["validated"]
+            self.time_received = kwargs["time_received"]
+            self.time_created = kwargs["time_created"]
             self.valuesDict = {}
 
     def __repr__(self):

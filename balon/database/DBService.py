@@ -8,9 +8,9 @@ from balon import db
 from balon import app
 
 from balon.models.Flight import Flight
-from balon.models.Param import Param
-#from balon.models.Parameter import Parameter
-from balon.models.Val import Val
+from balon.models.Parameter import Parameter
+# from balon.models.Parameter import Parameter
+from balon.models.Value import Value
 from balon.models.Event import Event
 
 LOG = logging.getLogger(app.config['LOGGING_LOGGER_DB'])
@@ -167,12 +167,12 @@ def getEventsByFlight(flight_id):
 # -------------------------
 
 def saveParameter(parameter):
-
-    LOG.info("Query for parameter save")
-
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO parameter ({},{},{},{})" \
-                "VALUES ({},{},{},{})".format(Param.type_DB,Param.time_received_DB,Param.time_created_DB,Param.flight_id_DB,parameter.type,parameter.time_received,parameter.time_created,parameter.flight_id)
+                "VALUES ({},{},{},{})".format(
+            Parameter.ParameterEntry.KEY_TYPE, Parameter.ParameterEntry.KEY_TIME_RECEIVED,
+            Parameter.ParameterEntry.KEY_TIME_CREATED, Parameter.ParameterEntry.KEY_FLIGHT_ID,
+            parameter.type, parameter.time_received, parameter.time_created, parameter.flight_id)
 
         LOG.debug(query)
 
@@ -203,11 +203,11 @@ def getParametersByFlight(flight_id):
         while True:
             if p is None:
                 break
-            param = Param(fromDB=p)
+            param = Parameter(fromDB=p)
             pid = p["id"]
 
             while param.id == pid:
-                val = Val(p["value"], p["unit"], p["name"], p["value_1.id"])
+                val = Value(fromDB=p)
                 param.valuesDict[val.name] = val
                 p = cur.fetchone()
                 if p is None:
@@ -238,11 +238,11 @@ def getParametersByKeyByFlight(key, value, flight_id):
         while True:
             if p is None:
                 break
-            param = Param(fromDB=p)
+            param = Parameter(fromDB=p)
             pid = p["id"]
 
             while param.id == pid:
-                val = Val(p["value"], p["unit"], p["name"], p["value_1.id"])
+                val = Value(fromDB=p)
                 param.valuesDict[val.name] = val
                 p = cur.fetchone()
                 if p is None:
@@ -282,11 +282,11 @@ def getParameterLastByFlight(key, value, flight_id):
         p = cur.fetchone()
         if p is None:
             return None
-        param = Param(fromDB=p)
+        param = Parameter(fromDB=p)
         pid = p["id"]
 
         while param.id == pid:
-            val = Val(p["value"], p["unit"], p["name"], p["value_1.id"])
+            val = Value(fromDB=p)
             param.valuesDict[val.name] = val
             p = cur.fetchone()
             if p is None:
@@ -317,11 +317,11 @@ def getParameterFirstByFlight(key, value, flight_id):
         p = cur.fetchone()
         if p is None:
             return None
-        param = Param(fromDB=p)
+        param = Parameter(fromDB=p)
         pid = p["id"]
 
         while param.id == pid:
-            val = Val(p["value"], p["unit"], p["name"], p["value_1.id"])
+            val = Value(fromDB=p)
             param.valuesDict[val.name] = val
             p = cur.fetchone()
             if p is None:
