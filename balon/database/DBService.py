@@ -6,7 +6,6 @@ import MySQLdb
 
 from balon import db
 from balon import app
-from balon import mysql
 
 from balon.models.Flight import Flight
 from balon.models.Param import Param
@@ -35,7 +34,7 @@ if (app.config['LOGGING_CONSOLE_DB']):
 # -------------------------
 
 def getFlightByKey(key, value):
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM flight " \
                 "WHERE {} = {} LIMIT 1".format(key,value)
 
@@ -48,9 +47,9 @@ def getFlightByKey(key, value):
 
 
 def getFlightById(flight_id):
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM flight " \
                 "WHERE {} = {} LIMIT 1".format(Flight.flight_id_DB,flight_id)
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
 
         LOG.debug(query)
         cur.execute(query)
@@ -61,7 +60,7 @@ def getFlightById(flight_id):
 
 
 def getFlightAll():
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM flight"
 
         LOG.debug(query)
@@ -82,24 +81,24 @@ def saveFlight(flight):
     LOG.info("Query for flight save")
     LOG.debug(flight)
 
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO flight " \
                 "VALUES ({},{},{})".format(flight.number,flight.hash,flight.start_date)
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
 
         LOG.debug(query)
 
         try:
             cur.execute(query)
-            mysql.commit()
         except:     
-            mysql.rollback()
+            app.mysql.commit()
+            app.mysql.rollback()
             return False
 
     return True
 
 
 def updateFlight(flight):
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "UPDATE flight " \
                 "SET {} = {}, {} = {}, {} = {}" \
                 "WHERE {} = {}".format(Flight.flight_number_DB,flight.number,Flight.flight_hash_DB,flight.hash,Flight.flight_start_date_DB,flight.flight_start_date,Flight.flight_id_DB,flight.id)
@@ -108,15 +107,15 @@ def updateFlight(flight):
 
         try:
             cur.execute(query)
-            mysql.commit()
         except:     
-            mysql.rollback()
+            app.mysql.commit()
+            app.mysql.rollback()
             return False
 
     return True
 
 def deleteFlight(flight):
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "DELETE FROM flight " \
                 "WHERE id = {}".format(flight.id)
 
@@ -124,9 +123,9 @@ def deleteFlight(flight):
 
         try:
             cur.execute(query)
-            mysql.commit()
         except:     
-            mysql.rollback()
+            app.mysql.commit()
+            app.mysql.rollback()
             return False
 
     return True
@@ -149,7 +148,7 @@ def saveParameter(parameter):
 
     LOG.info("Query for parameter save")
 
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO parameter ({},{},{},{})" \
                 "VALUES ({},{},{},{})".format(Param.type_DB,Param.time_received_DB,Param.time_created_DB,Param.flight_id_DB,parameter.type,parameter.time_received,parameter.time_created,parameter.flight_id)
 
@@ -157,9 +156,9 @@ def saveParameter(parameter):
 
         try:
             cur.execute(query)
-            mysql.commit()
         except:     
-            mysql.rollback()
+            app.mysql.commit()
+            app.mysql.rollback()
             return False
 
     return True
@@ -170,7 +169,7 @@ def saveParameter(parameter):
 
 
 def getParametersByFlight(flight_id):
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
                 "WHERE flight_id = {} ORDER BY parameter.id".format(flight_id)
 
@@ -205,7 +204,7 @@ def getParametersByFlight(flight_id):
 
 def getParametersByKeyByFlight(key, value, flight_id):
     # q = {key: value, 'flight_id': flight_id}
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
                 "WHERE {} = '{}' AND flight_id = {} ORDER BY parameter.id".format(key,value,flight_id)
 
@@ -250,7 +249,7 @@ def getParameterLastByFlight(key, value, flight_id):
 #    q = {key: value, 'flight_id': flight_id}
 
 #-------------------------------------------------------
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
                 "WHERE {} = '{}' AND flight_id = {}" \
                 "ORDER BY parameter.time_created DESC".format(key,value,flight_id)
@@ -285,7 +284,7 @@ def getParameterFirstByFlight(key, value, flight_id):
 #    q = {key: value, 'flight_id': flight_id}
 
 #-------------------------------------------------------
-    with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
                 "WHERE {} = '{}' AND flight_id = {}" \
                 "ORDER BY parameter.time_created ASC".format(key,value,flight_id)
