@@ -144,9 +144,25 @@ def deleteFlight(flight):
 # -------------------------
 
 def saveEvent(event):
-    db.session.add(event)
-    db.session.commit()
-    return True
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+        query = "INSERT INTO event ({},{},{}) " \
+                "VALUES ('{}','{}','{}')".format(
+            Event.EventEntry.KEY_TYPE, Event.EventEntry.KEY_TIME_CREATED, Event.EventEntry.KEY_FLIGHT_ID,
+            event.type, event.time_created, event.flight_id)
+
+        LOG.debug(query)
+
+        try:
+            cur.execute(query)
+            app.mysql.commit()
+        except MySQLdb.Error, e:
+            LOG.error(e)
+            app.mysql.rollback()
+            return False
+
+        return cur.lastrowid
+
+
 def getEventsByFlight(flight_id):
         with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
             query = "SELECT * FROM event " \
