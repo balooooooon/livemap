@@ -212,7 +212,7 @@ def getEventsByFlight(flight_id):
 def saveParameter(parameter):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO parameter ({},{},{},{})" \
-                "VALUES ({},{},{},{})".format(
+                "VALUES ('{}','{}','{}','{}')".format(
             Parameter.ParameterEntry.KEY_TYPE, Parameter.ParameterEntry.KEY_TIME_RECEIVED,
             Parameter.ParameterEntry.KEY_TIME_CREATED, Parameter.ParameterEntry.KEY_FLIGHT_ID,
             parameter.type, parameter.time_received, parameter.time_created, parameter.flight_id)
