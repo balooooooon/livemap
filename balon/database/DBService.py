@@ -35,42 +35,32 @@ if (app.config['LOGGING_CONSOLE_DB']):
 # -------------------------
 
 def getFlightByKey(key, value):
-    q = {key: value}
-    LOG.info("Query for flight with ", q)
-
     with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM flight " \
-                "WHERE {} = {} ".format(key,value)
+                "WHERE {} = {} LIMIT 1".format(key,value)
 
         LOG.debug(query)
         cur.execute(query)
-
         p = cur.fetchone()
-        flight = Flight(fromDB=p)
 
-    return flight
+    if p is None: return None
+    return Flight(fromDB=p)
 
 
 def getFlightById(flight_id):
-    LOG.info("Query for flight with id: %d",flight_id)
-
     with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM flight " \
-                "WHERE {} = {} ".format(Flight.flight_id_DB,value)
+                "WHERE {} = {} LIMIT 1".format(Flight.flight_id_DB,flight_id)
 
         LOG.debug(query)
         cur.execute(query)
-
         p = cur.fetchone()
-        
-        flight = Flight(fromDB=p)
 
-    return flight
+    if p is None: return None
+    return Flight(fromDB=p)
 
 
 def getFlightAll():
-    LOG.info("Query for all flights with")
-
     with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM flight"
 
@@ -82,9 +72,7 @@ def getFlightAll():
         while True:
             if p is None:
                 break
-            flight = Flight(fromDB=p)
-
-            flights.append(flight)
+            flights.append(Flight(fromDB=p))
             p = cur.fetchone()
 
     return flights
@@ -92,10 +80,11 @@ def getFlightAll():
 
 def saveFlight(flight):
     LOG.info("Query for flight save")
+    LOG.debug(flight)
 
     with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO flight " \
-                "VALUES ({},{},{},{})".format(flight.id,flight.number,flight.hash,flight.start_date)
+                "VALUES ({},{},{})".format(flight.number,flight.hash,flight.start_date)
 
         LOG.debug(query)
 
@@ -110,9 +99,6 @@ def saveFlight(flight):
 
 
 def updateFlight(flight):
-
-    LOG.info("Query for flight update")
-
     with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "UPDATE flight " \
                 "SET {} = {}, {} = {}, {} = {}" \
@@ -129,15 +115,7 @@ def updateFlight(flight):
 
     return True
 
-    db.session.add(flight)
-    db.session.commit()
-    return True
-
-
 def deleteFlight(flight):
-
-    LOG.info("Query for flight delete")
-
     with closing(mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "DELETE FROM flight " \
                 "WHERE id = {}".format(flight.id)
