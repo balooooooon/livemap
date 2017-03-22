@@ -67,7 +67,7 @@ def saveNewEvent(flight, data, time_received):
 
     parameters = data['parameters']
 
-    event = Event(data['event'], datetime.fromtimestamp(dt))
+    event = Event(flight_id=flight.id, type=data['event'], time_created=datetime.fromtimestamp(dt))
 
     for param in parameters:
         type = param['type']

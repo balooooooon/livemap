@@ -176,7 +176,7 @@ def saveNewFlight(number, datetime):
     hash = service.computeHash(number)
     # Compute hash for Flight
 
-    flight = Flight(int(number), hash, datetime)
+    flight = Flight(number=int(number), hash=hash, start_date=datetime)
     # Create new Flight object
 
     return service.saveNewFlight(flight)
