@@ -21,12 +21,12 @@ def getValueUnit(type):
 # -------------------------
 
 def getFlightById(flight_id):
-    flight = dao.getFlightByKey(Flight.flight_id_DB, flight_id)
+    flight = dao.getFlightByKey(Flight.FlightEntry.KEY_ID, flight_id)
     return flight
 
 
 def getFlightByNumber(flight_number):
-    flight = dao.getFlightByKey(Flight.flight_number_DB, flight_number)
+    flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     return flight
 
 
@@ -176,7 +176,7 @@ def getValueObject(v):
 # -------------------------
 
 def getFlightLastPosition(flight_number):
-    flight = dao.getFlightByKey(Flight.flight_number_DB, flight_number)
+    flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameter = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
     #if parameter is not None:
     #    fillValuesDictionary(parameter)
@@ -184,7 +184,7 @@ def getFlightLastPosition(flight_number):
 
 
 def getFlightFirstPosition(flight_number):
-    flight = dao.getFlightByKey(Flight.flight_number_DB, flight_number)
+    flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameter = dao.getParameterFirstByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
     #if parameter is not None:
     #    fillValuesDictionary(parameter)
@@ -192,7 +192,7 @@ def getFlightFirstPosition(flight_number):
 
 
 def getFlightPath(flight_number):
-    flight = dao.getFlightByKey(Flight.flight_number_DB, flight_number)
+    flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameters = dao.getParametersByKeyByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
     #for p in parameters:
     #    fillValuesDictionary(p)
