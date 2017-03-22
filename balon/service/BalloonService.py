@@ -82,7 +82,8 @@ def saveNewEvent(flight, data, time_received):
         inputValues = param['values']
         for key, val in inputValues.iteritems():
             unit = getValueUnit(type)
-            p.values.append(Value(val, unit, key))
+            val = Value(value=val, unit=unit, name=key)
+            p.values[key] = val
 
         flight.parameters.append(p)
         event.parameters.append(p)
@@ -110,7 +111,8 @@ def saveParameterWithValues(flight, data, time_received):
         inputValues = param['values']
         for key, val in inputValues.iteritems():
             unit = getValueUnit(type)
-            p.values.append(Value(val, unit, key))
+            val = Value(value=val, unit=unit, name=key)
+            p.values[key] = val
 
         flight.parameters.append(p)
 

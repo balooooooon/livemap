@@ -30,7 +30,7 @@
 						<td>{{ parameter.time_created|format_datetime }}</td>
 						<td>
 							{% for val in parameter.values %}
-								{{ val.name }}: {{ val.value }}<br>
+								{{ parameter.values[val].name }}: {{ parameter.values[val].value }}<br>
 							{% endfor %}
 						</td>
 					</tr>

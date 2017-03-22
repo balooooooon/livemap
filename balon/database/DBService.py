@@ -223,7 +223,7 @@ def getParametersByFlight(flight_id):
 
             while param.id == pid:
                 val = Value(fromDB=p)
-                param.valuesDict[val.name] = val
+                param.values[val.name] = val
                 p = cur.fetchone()
                 if p is None:
                     break
@@ -253,7 +253,7 @@ def getParametersByKeyByFlight(key, value, flight_id):
 
             while param.id == pid:
                 val = Value(fromDB=p)
-                param.valuesDict[val.name] = val
+                param.values[val.name] = val
                 p = cur.fetchone()
                 if p is None:
                     break
@@ -281,7 +281,7 @@ def getParameterLastByFlight(key, value, flight_id):
 
         while param.id == pid:
             val = Value(fromDB=p)
-            param.valuesDict[val.name] = val
+            param.values[val.name] = val
             p = cur.fetchone()
             if p is None:
                 break
@@ -307,7 +307,7 @@ def getParameterFirstByFlight(key, value, flight_id):
 
         while param.id == pid:
             val = Value(fromDB=p)
-            param.valuesDict[val.name] = val
+            param.values[val.name] = val
             p = cur.fetchone()
             if p is None:
                 break
