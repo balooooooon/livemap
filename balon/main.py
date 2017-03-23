@@ -10,10 +10,9 @@ import json
 
 # Controller
 from balon.controller import Controller, WebController, SocialController
-from balon import app, socketio, LOG, db
+from balon import app, socketio, LOG
 
 # ----------------- IMPORTS -----------------
-from balon.models.Flight import Flight
 
 LOG.debug("Starting flask app main.py")
 
@@ -240,7 +239,3 @@ def balloonUpdate():
     emit('message', {'data': '[Server]: You have been connected.'})
     global thread
 
-
-def init_db():
-    from models import Flight, Parameter, Value, Event
-    db.create_all()

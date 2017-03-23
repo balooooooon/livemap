@@ -1,23 +1,11 @@
-from balon import db
+from flask import json
 
 
-class Parameter(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-
-    type = db.Column(db.String(20))
-    source = db.Column(db.String(20))
-
-    valid = db.Column(db.Boolean)
-    validated = db.Column(db.Boolean)
-
-    time_received = db.Column(db.DateTime)
-    time_created = db.Column(db.DateTime)
-
-    flight_id = db.Column(db.Integer, db.ForeignKey('flight.id'))
-    values = db.relationship('Value', backref="parameter", lazy='dynamic')
+class Parameter(object):
 
     class ParameterEntry():
         TABLE_NAME = "parameter"
+
         KEY_ID = "id"
         KEY_FLIGHT_ID = "flight_id"
         KEY_TYPE = "type"
@@ -27,11 +15,34 @@ class Parameter(db.Model):
         KEY_TIME_RECEIVED = "time_received"
         KEY_TIME_CREATED = "time_created"
 
-    def __init__(self, type, time_received, time_created):
-        self.type = type
-        self.time_received = time_received
-        self.time_created = time_created
-        self.valuesDict = None
+    def __init__(self,*args,**kwargs):
+        if kwargs.has_key("fromDB"):
+            fromDB = kwargs["fromDB"]
+            if fromDB is None: raise ValueError()
+
+            self.id = fromDB["id"]
+            self.flight_id = fromDB["flight_id"]
+            self.type = fromDB["type"]
+            self.source = fromDB["source"]
+            self.valid = fromDB["valid"]
+            self.validated = fromDB["validated"]
+            self.time_received = fromDB["time_received"]
+            self.time_created = fromDB["time_created"]
+            self.values = {}
+        else:
+            self.id = kwargs.get("id",None)
+            self.flight_id = kwargs.get("flight_id",None)
+            self.type = kwargs.get("type",None)
+            self.source = kwargs.get("source",None)
+            self.valid = kwargs.get("valid",None)
+            self.validated = kwargs.get("validated",None)
+            self.time_received = kwargs.get("time_received",None)
+            self.time_created = kwargs.get("time_created",None)
+            self.values = kwargs.get("values",{})
 
     def __repr__(self):
         return '<Parameter [%d] [F:%d] %r >' % (self.id, self.flight_id, self.type)
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__,
+                          sort_keys=True, indent=4)
