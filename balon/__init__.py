@@ -1,9 +1,9 @@
 # ----------------- IMPORTS -----------------
 
 # Flask imports
+import MySQLdb
 from flask import Flask
 from flask_socketio import SocketIO
-from flask_sqlalchemy import SQLAlchemy
 import logging
 
 # ----------------- IMPORTS -----------------
@@ -40,16 +40,23 @@ if (app.config['LOGGING_CONSOLE']):
 
 LOG.setLevel(logging.DEBUG)
 
-# LOG.debug("Database Path: %s", app.config["DATABASE"])
 
 async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
 
 LOG.debug("Starting flask app __init__.py")
 
-db = SQLAlchemy(app)
+LOG.debug("Connection to database: %s@%s", app.config["MYSQL_DATABASE_DB"], app.config["MYSQL_DATABASE_HOST"])
+app.mysql = MySQLdb.connect(host=app.config["MYSQL_DATABASE_HOST"],
+                            user=app.config["MYSQL_DATABASE_USER"],
+                            passwd=app.config["MYSQL_DATABASE_PASSWORD"],
+                            db=app.config["MYSQL_DATABASE_DB"])
+
+# TODO Test Database connection
+
 
 import main
+
 
 @app.route('/')
 def hello_world():

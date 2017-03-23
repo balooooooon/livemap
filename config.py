@@ -14,6 +14,7 @@ class Config(object):
     
     SQLALCHEMY_DATABASE_URI = 'mysql://balon:balon@localhost/balon_dev'
 
+
     MYSQL_DATABASE_USER = "balon"
     MYSQL_DATABASE_PASSWORD = "balon"
     MYSQL_DATABASE_DB = "balon_dev"
@@ -86,6 +87,7 @@ class ProductionConfig(Config):
 
     # -- DATABASE
     
+
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://balon:balon@localhost/balon_live'
     
     MYSQL_DATABASE_USER = "balon"
@@ -93,6 +95,7 @@ class ProductionConfig(Config):
     MYSQL_DATABASE_DB = "balon_live"
     MYSQL_DATABASE_HOST = "localhost"
     MYSQL_CURSORCLASS = "SSDictCursor"
+
 
     # -- LOGGERS
     LOGGING_LOCATION = "/var/log/balon/prod/balon.log"

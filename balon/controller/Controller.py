@@ -25,8 +25,8 @@ def getBalloonLocation(flight_number):
             'type': "current",
             'point': {
                 'time': parameter.time_received,
-                'lat': parameter.valuesDict["lat"].value,
-                'lng': parameter.valuesDict["lng"].value
+                'lat': parameter.values["lat"].value,
+                'lng': parameter.values["lng"].value
             }
         }
 
@@ -46,8 +46,8 @@ def getBalloonStart(flight_number):
             'type': "start",
             'point': {
                 'time': parameter.time_received,
-                'lat': parameter.valuesDict["lat"].value,
-                'lng': parameter.valuesDict["lng"].value
+                'lat': parameter.values["lat"].value,
+                'lng': parameter.values["lng"].value
             }
         }
 
@@ -64,14 +64,14 @@ def getBalloonBurst(flight_number):
 
     for e in events:
         if e.type == "burst":
-            service.fillParametersDictionary(e)
-            parameter = e.parametersDict["position"]
+            # service.fillParametersDictionary(e)
+            parameter = e.parameters["position"]
             position = {
                 'type': "burst",
                 'point': {
                     'time': parameter.time_received,
-                    'lat': parameter.valuesDict["lat"].value,
-                    'lng': parameter.valuesDict["lng"].value
+                    'lat': parameter.values["lat"].value,
+                    'lng': parameter.values["lng"].value
                 }
             }
 
@@ -96,8 +96,8 @@ def getBalloonPath(flight_number):
         LOG.debug(p)
         point = {
             'time': p.time_received,
-            'lat': p.valuesDict["lat"].value,
-            'lng': p.valuesDict["lng"].value
+            'lat': p.values["lat"].value,
+            'lng': p.values["lng"].value
         }
 
         path["data"]["points"].append(point)
@@ -176,7 +176,7 @@ def saveNewFlight(number, datetime):
     hash = service.computeHash(number)
     # Compute hash for Flight
 
-    flight = Flight(int(number), hash, datetime)
+    flight = Flight(number=int(number), hash=hash, start_date=datetime)
     # Create new Flight object
 
     return service.saveNewFlight(flight)
