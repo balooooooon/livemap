@@ -10,10 +10,9 @@ import json
 
 # Controller
 from balon.controller import Controller# , WebController, SocialController
-from balon import app, socketio, LOG,  db , observer
+from balon import app, socketio, LOG, observer
 
 # ----------------- IMPORTS -----------------
-from balon.models.Flight import Flight
 
 LOG.debug("Starting flask app main.py")
 
@@ -231,6 +230,3 @@ def socket_join(data):
     join_room(flight_id)
     emit('message', {'data': 'Subscribed for flight #{}'.format(flightNumber)})
 
-def init_db():
-    from models import Flight, Parameter, Value, Event
-    db.create_all()

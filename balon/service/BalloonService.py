@@ -1,4 +1,4 @@
-from balon import app, LOG, db
+from balon import app, LOG
 from balon.database import DBService as dao
 from balon.models.Event import Event
 
@@ -8,6 +8,7 @@ from balon.models.Value import Value
 
 import hashlib
 from datetime import datetime
+
 
 
 def getValueUnit(type):
@@ -66,7 +67,8 @@ def saveNewEvent(flight, data, time_received):
 
     parameters = data['parameters']
 
-    event = Event(data['event'], datetime.fromtimestamp(dt))
+    event = Event(flight_id=flight.id, type=data['event'], time_created=datetime.fromtimestamp(dt))
+    event.id = dao.saveEvent(event)
 
     for param in parameters:
         type = param['type']
@@ -76,18 +78,21 @@ def saveNewEvent(flight, data, time_received):
         else:
             time_created = datetime.fromtimestamp(dt)
 
-        p = Parameter(type, datetime.fromtimestamp(time_received), time_created)
+        p = Parameter(type=type, time_received=datetime.fromtimestamp(time_received), time_created=time_created, flight_id=flight.id)
+        p.id = dao.saveParameter(p)
+        dao.bindParameterToEvent(p.id, event.id)
 
         inputValues = param['values']
         for key, val in inputValues.iteritems():
             unit = getValueUnit(type)
-            p.values.append(Value(val, unit, key))
+            val = Value(value=val, unit=unit, name=key)
+            p.values[key] = val
+            dao.saveValue(val, p.id)
 
         flight.parameters.append(p)
-        event.parameters.append(p)
+        event.parameters[p.type] = p
 
-    dao.saveFlight(flight)
-    dao.saveEvent(event)
+    # dao.saveFlight(flight)
 
     return True
 
@@ -104,37 +109,40 @@ def saveParameterWithValues(flight, data, time_received):
         else:
             time_created = datetime.fromtimestamp(dt)
 
-        p = Parameter(type, datetime.fromtimestamp(time_received), time_created)
+        p = Parameter(flight_id=flight.id, type=type, time_received=datetime.fromtimestamp(time_received),
+                      time_created=time_created)
+        p.id = dao.saveParameter(p)
 
         inputValues = param['values']
+        LOG.debug(inputValues)
         for key, val in inputValues.iteritems():
             unit = getValueUnit(type)
-            p.values.append(Value(val, unit, key))
+            val = Value(value=val, unit=unit, name=key)
+            p.values[key] = val
+            dao.saveValue(val, p.id)
 
         flight.parameters.append(p)
 
-    dao.saveFlight(flight)
+    # dao.saveFlight(flight)
     return True
 
 
 def getParametersWithValuesByFlight(flight_id):
     # flight = dao.getFlightById(flight_id)
     parameters = dao.getParametersByFlight(flight_id)
-
     # Storing values in dicttionary for better retrieval
     # Possible to store in DB as PickleType
     for p in parameters:
         fillValuesDictionary(p)
-
     return parameters
 
 
 def getEventsByFlight(flight_id):
     events = dao.getEventsByFlight(flight_id)
-    for e in events:
-        fillParametersDictionary(e)
-        for p in e.parameters:
-            fillValuesDictionary(p)
+    #for e in events:
+    #    fillParametersDictionary(e)
+    #    for p in e.parameters:
+    #        fillValuesDictionary(p)
 
     return events
 
@@ -170,39 +178,41 @@ def getValueObject(v):
 def getFlightLastPosition(flight_number):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameter = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
-    if parameter is not None:
-        fillValuesDictionary(parameter)
+    #if parameter is not None:
+    #    fillValuesDictionary(parameter)
     return parameter
 
 
 def getFlightFirstPosition(flight_number):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameter = dao.getParameterFirstByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
-    if parameter is not None:
-        fillValuesDictionary(parameter)
+    #if parameter is not None:
+    #    fillValuesDictionary(parameter)
     return parameter
 
 
 def getFlightPath(flight_number):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameters = dao.getParametersByKeyByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
-    for p in parameters:
-        fillValuesDictionary(p)
+    #for p in parameters:
+    #    fillValuesDictionary(p)
     return parameters
 
 
 def fillValuesDictionary(p):
     if p is None:
         raise TypeError("Parameter is Null")
-    p.valuesDict = {}
-    for v in p.values:
-        p.valuesDict[v.name] = v
+    valuesDictTemp = {}
+    for v in p.valuesDict:
+        valuesDictTemp[v] = p.valuesDict[v].value
+
+    return valuesDictTemp
 
 
-def fillParametersDictionary(e):
-    if e is None:
-        raise TypeError("Parameter is Null")
-    e.parametersDict = {}
-    for p in e.parameters:
-        fillValuesDictionary(p)
-        e.parametersDict[p.type] = p
+#def fillParametersDictionary(e):
+#    if e is None:
+#        raise TypeError("Parameter is Null")
+#    e.parametersDict = {}
+#    for p in e.parameters:
+#        fillValuesDictionary(p)
+#        e.parametersDict[p.type] = p
