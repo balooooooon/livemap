@@ -105,8 +105,6 @@ def flight_detail(flight_id):
     charts = Controller.getChartTypes(flight_id)
     LOG.debug(charts)
 
-    LOG.debug(parameters[3].valuesDict)
-
     events = Controller.getEventsAllByFlight(flight_id)
 
     import json_tricks

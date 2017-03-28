@@ -132,8 +132,8 @@ def getParametersWithValuesByFlight(flight_id):
     parameters = dao.getParametersByFlight(flight_id)
     # Storing values in dicttionary for better retrieval
     # Possible to store in DB as PickleType
-    for p in parameters:
-        fillValuesDictionary(p)
+    # for p in parameters:
+    #     fillValuesDictionary(p)
     return parameters
 
 
@@ -248,6 +248,6 @@ def getChartData(flight_id, value):
         x["id"] = p.id
         x["time_received"] = p.time_received
         x["time_created"] = p.time_created
-        x["val"] = p.valuesDict[value]
+        x["val"] = p.values[value]
         result.append(x)
     return result

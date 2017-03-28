@@ -72,8 +72,8 @@
 		for (i in balloonData) {
 		    p = balloonData[i];
 		    if ( p.type == "temperature" ) {
-                interiorTemp = p.valuesDict["in"].value;
-                exteriorTemp = p.valuesDict["out"].value;
+                interiorTemp = p.values["in"].value;
+                exteriorTemp = p.values["out"].value;
                 time = p.time_received;
                 var tt = new Date(time);
                 googleChartData.addRow([tt.toLocaleTimeString(),interiorTemp,exteriorTemp]);
@@ -128,12 +128,12 @@
 			$(document).ready(function(){
 			    $( function() {
 					$( ".chartValue-input" ).checkboxradio();
-					$( "#graph_controls > fieldset" ).controlgroup();
+					$( "#graph_controls").find("> fieldset" ).controlgroup();
 				} );
 
 			    function handleChartLine(value) {
 			    	if( cacheData[value] != null ) {
-	    				console.log("Already retrieved.")
+	    				console.log("Already retrieved.");
 	    				var data = cacheData[value];
 	    				showChartLine(data,value);
 	    			} else {

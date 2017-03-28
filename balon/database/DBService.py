@@ -393,3 +393,34 @@ def saveValue(value, parameter_id):
 
         return cur.lastrowid
 
+def getParameterTypes(flight_id):
+    query = "SELECT type FROM parameter WHERE flight_id = '{}' GROUP BY type".format(flight_id)
+
+    types = None
+
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
+        LOG.debug(query)
+        cur.execute(query)
+        types = cur.fetchall()
+
+    if len(types) == 0:
+        return None
+
+    return types
+
+
+def getValueTypesByParameter(flight_id, type):
+    query = "SELECT name FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
+            "WHERE flight_id = {} AND type = '{}' GROUP BY value_1.name".format(flight_id,type)
+
+    types = None
+
+    with closing(app.mysql.cursor(MySQLdb.cursors.SSCursor)) as cur:
+        LOG.debug(query)
+        cur.execute(query)
+        types = cur.fetchall()
+
+    if len(types) == 0:
+        return None
+
+    return types
