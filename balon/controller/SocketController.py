@@ -3,6 +3,9 @@ from balon.controller.IBalloonSubject import IBalloonSubject
 
 
 class SocketController(IBalloonSubject):
+    def notifyEvent(self, flight_id):
+        pass
+
     def notify(self, flight_id):
         LOG.debug("SocketController")
         self.emitUpdate(flight_id)

@@ -8,3 +8,8 @@ class IBalloonSubject(object):
     def notify(self, flight_id):
         raise NotImplementedError()
         pass
+
+    @abstractmethod
+    def notifyEvent(self, flight_id):
+        raise NotImplementedError()
+        pass

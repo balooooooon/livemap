@@ -6,6 +6,9 @@ from balon.controller.IBalloonSubject import IBalloonSubject
 
 
 class SocialController(IBalloonSubject):
+    def notifyEvent(self, flight_id):
+        pass
+
     def notify(self, flight_id):
         pass
 
