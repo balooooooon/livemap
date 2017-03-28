@@ -1,6 +1,7 @@
 import logging
 from contextlib import closing
 
+import MySQLdb
 from flask_sqlalchemy import get_debug_queries
 
 from balon import app
