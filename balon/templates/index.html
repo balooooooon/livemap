@@ -34,7 +34,10 @@
     var icons = {
       balloon: "{{ url_for('static',filename='img/airballoon.png') }}",
       burst: "{{ url_for('static',filename='img/explosion.png') }}",
-      start: "{{ url_for('static',filename='img/launched-rocket.png') }}"
+      start: "{{ url_for('static',filename='img/launched-rocket.png') }}",
+      //TO DO : add icon for landing 
+      land: "{{ url_for('static',filename='img/landingPredicted.png') }}",
+      landingPredicted: "{{ url_for('static',filename='img/landing-predicted.png') }}"
     }
 
     var map;
@@ -53,6 +56,9 @@
 
     var landingPosition;
     var landingMarker;
+
+    var landingPredictedPosition;
+    var landingPredictedMarker;
 
     function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -83,8 +89,14 @@
           icon: icons.start,
           map: map
         })
-
+        //TODO Change
         landingMarker = new google.maps.Marker({
+          icon: icons.landingPredicted,
+          map: map
+        })
+
+        landingPredictedMarker = new google.maps.Marker({
+          icon: icons.landingPredicted,
           map: map
         })
 
@@ -118,6 +130,10 @@
           landingPosition = setMarkerPosition(landingPosition,landingMarker,balloonData.landing.point,null);
         }
 
+        if( "landingPredicted" in balloonData ) {
+          landingPredictedPosition = setMarkerPosition(landingPredictedPosition,landingPredictedMarker,balloonData.landingPredicted.point,null);
+        }
+
         path.setMap(map);
 
         pathPredicted.setMap(map);
@@ -127,7 +143,7 @@
         }
 
         if( "predictedPath" in balloonData ) {
-          setPath(pathPredicted,balloonData.predictedPath);
+          setPath(pathPredicted,balloonData.predictedPath.data.points,"new");
         }
       }
 

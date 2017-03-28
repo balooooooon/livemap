@@ -9,7 +9,7 @@ from flask_socketio import SocketIO, emit
 import json
 
 # Controller
-from balon.controller import Controller, WebController, SocialController
+from balon.controller import Controller, WebController, SocialController, PredictionController
 from balon import app, socketio, LOG
 
 # ----------------- IMPORTS -----------------
@@ -55,17 +55,20 @@ def balloonDashboard():
     balloonStart = Controller.getBalloonStart(flight_number)
     if balloonStart:
         data['start'] = balloonStart
+        predictionResult, predictionPathResult = PredictionController.getBalloonLanding(data['start'])
+        if predictionResult:
+            data['landingPredicted'] = predictionResult
+            data['predictedPath'] = predictionPathResult
 
     flightList = Controller.getFlightList()
     if flightList:
         data['flightList'] = flightList
 
-    # balloonLanding = getBalloonLanding()
 
     # balloonTelemetry = getActualTelemetry()
 
     LOG.debug("Sending data: ", data)
-
+    LOG.debug(data)
     return render_template("index.html", async_mode=socketio.async_mode, balloon_data=data)
 
 
