@@ -14,9 +14,9 @@ app = Flask(__name__)
 # Nacita config zo suboru config.py
 
 if app.config["TESTING"]:
-    app.config.from_object('config.DevelopConfig')
-else:
     app.config.from_object('config.TestingConfig')
+else:
+    app.config.from_object('config.DevelopConfig')
 
 # Ak je vytvorena premenna prostredia BALLOON_CONFIG, prepise config vyssie
 app.config.from_envvar('BALLOON_CONFIG', silent=True)
