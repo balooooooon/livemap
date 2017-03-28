@@ -162,13 +162,13 @@ def api_telemetry(flight_number):
     if not Controller.authenticate(flight_number, flightHash):
         abort(401)
 
-    flight_id = Controller.getFlightByNumber(flight_number)
+    flight = Controller.getFlightByNumber(flight_number)
 
     if json_request.has_key("data"):
         LOG.info("Telemetry data accepted")
         # Controller.checkTelemetryJsonData(json_request["data"])
         Controller.saveNewParameters(flight_number, json_request["data"])
-        observer.update(flight_id)
+        observer.update(flight.id)
         # WebController.refreshSite(flight_number)
         # SocialController.postStatuses(altitude,timestamp)
 
@@ -226,7 +226,8 @@ def balloonUpdate():
 def socket_join(data):
     LOG.debug(data["flight"])
     flightNumber = data["flight"]
-    flight_id = Controller.getFlightByNumber(flightNumber)
-    join_room(flight_id)
-    emit('message', {'data': 'Subscribed for flight #{}'.format(flightNumber)})
+    flight = Controller.getFlightByNumber(flightNumber)
+    join_room(flight.id)
+    LOG.debug(flask_socketio.rooms())
+    emit('message', {'data': 'Subscribed for flight #{}'.format(flightNumber)}, namespace="/map")
 

@@ -161,11 +161,11 @@
         console.log("[Server]: " + data.data);
       });
 
-      socket.on('baloon_update', function(data) {
+      socket.on('balloon_update', function(data) {
 
           console.log("[Server]: ", data);
           
-          var message = JSON.parse(data);
+          var message = data;
 
           console.log("JSON message: ", message);
 
