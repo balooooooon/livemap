@@ -234,10 +234,20 @@ def flightExists(flight_number):
     else:
         return False
 
-
 def getFlightByNumber(flight_number):
     flight = service.getFlightByNumber(flight_number)
     if isinstance(flight,Flight):
         return flight
     else:
         return None
+
+
+def getChartTypes(flight_id):
+    charts = service.getChartTypes(flight_id) or None
+    LOG.debug(charts)
+    return charts
+
+
+def getChartData(flight_id, value):
+    chartData = service.getChartData(flight_id,value)
+    return chartData
