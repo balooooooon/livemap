@@ -132,8 +132,8 @@ def getParametersWithValuesByFlight(flight_id):
     parameters = dao.getParametersByFlight(flight_id)
     # Storing values in dicttionary for better retrieval
     # Possible to store in DB as PickleType
-    for p in parameters:
-        fillValuesDictionary(p)
+    # for p in parameters:
+    #     fillValuesDictionary(p)
     return parameters
 
 
@@ -208,11 +208,46 @@ def fillValuesDictionary(p):
 
     return valuesDictTemp
 
+def fillParametersDictionary(e):
+    if e is None:
+        raise TypeError("Parameter is Null")
+    e.parametersDict = {}
+    for p in e.parameters:
+        fillValuesDictionary(p)
+        e.parametersDict[p.type] = p
 
-#def fillParametersDictionary(e):
-#    if e is None:
-#        raise TypeError("Parameter is Null")
-#    e.parametersDict = {}
-#    for p in e.parameters:
-#        fillValuesDictionary(p)
-#        e.parametersDict[p.type] = p
+
+def getChartTypes(flight_id):
+    parameterTypes = dao.getParameterTypes(flight_id)
+    LOG.debug(parameterTypes)
+
+    if parameterTypes is not None:
+        for p in parameterTypes:
+            LOG.debug(p)
+            p["values"] = {}
+            val = dao.getValueTypesByParameter(flight_id, p["type"])
+            LOG.debug(val)
+            p["values"] = val
+
+        return parameterTypes
+    else:
+        return None
+
+
+def getChartData(flight_id, value):
+    """
+
+    @param flight_id:
+    @param value:
+    @return: Data or None
+    """
+    data = dao.getParametersByKeyByFlight('value_1.name',value,flight_id) or None
+    result = []
+    for p in data:
+        x = {}
+        x["id"] = p.id
+        x["time_received"] = p.time_received
+        x["time_created"] = p.time_created
+        x["val"] = p.values[value]
+        result.append(x)
+    return result

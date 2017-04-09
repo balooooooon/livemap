@@ -8,11 +8,19 @@ import logging
 
 # ----------------- IMPORTS -----------------
 
+from balon.controller.BalloonObserver import BalloonObserver
+# from balon.controller.SocialController import SocialController
+# from balon.controller.SocketController import SocketController
+
 app = Flask(__name__)
 
 # http://stackoverflow.com/questions/15603240/flask-how-to-manage-different-environment-databases
 # Nacita config zo suboru config.py
-app.config.from_object('config.DevelopConfig')
+
+if app.config["TESTING"]:
+    app.config.from_object('config.TestingConfig')
+else:
+    app.config.from_object('config.DevelopConfig')
 
 # Ak je vytvorena premenna prostredia BALLOON_CONFIG, prepise config vyssie
 app.config.from_envvar('BALLOON_CONFIG', silent=True)
@@ -54,6 +62,12 @@ app.mysql = MySQLdb.connect(host=app.config["MYSQL_DATABASE_HOST"],
 
 # TODO Test Database connection
 
+
+observer = BalloonObserver()
+#socialController = SocialController()
+#socketController = SocketController()
+#observer.register(socialController)
+#observer.register(socketController)
 
 import main
 

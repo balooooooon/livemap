@@ -9,8 +9,8 @@ from flask_socketio import SocketIO, emit
 import json
 
 # Controller
-from balon.controller import Controller, WebController, SocialController, PredictionController
-from balon import app, socketio, LOG
+from balon.controller import Controller, WebController, PredictionController, SocialController
+from balon import app, socketio, LOG, observer
 
 # ----------------- IMPORTS -----------------
 
@@ -68,7 +68,7 @@ def balloonDashboard():
     # balloonTelemetry = getActualTelemetry()
 
     LOG.debug("Sending data: ", data)
-    LOG.debug(data)
+
     return render_template("index.html", async_mode=socketio.async_mode, balloon_data=data)
 
 
@@ -104,9 +104,19 @@ def flight_detail(flight_id):
 
     parameters = None
     parameters = Controller.getParametersAllByFlight(flight_id)
+
+    charts = Controller.getChartTypes(flight_id)
+    LOG.debug(charts)
+
     events = Controller.getEventsAllByFlight(flight_id)
 
-    return render_template("show_flight_detail.html", parameters=parameters, flight=flight, events=events)
+    import json_tricks
+
+    data = json_tricks.dumps(parameters, primitives=True)
+    # LOG.debug(data)
+
+    return render_template("show_flight_detail.html", parameters=parameters, flight=flight, events=events,
+                           balloonData=data, chartData=charts)
 
 
 @app.template_filter('format_datetime')
@@ -165,10 +175,13 @@ def api_telemetry(flight_number):
     if not Controller.authenticate(flight_number, flightHash):
         abort(401)
 
+    flight = Controller.getFlightByNumber(flight_number)
+
     if json_request.has_key("data"):
         LOG.info("Telemetry data accepted")
         # Controller.checkTelemetryJsonData(json_request["data"])
         Controller.saveNewParameters(flight_number, json_request["data"])
+        observer.update(flight.id)
         # WebController.refreshSite(flight_number)
         # SocialController.postStatuses(altitude,timestamp)
 
@@ -191,12 +204,26 @@ def api_events(flight_number, event):
     if not Controller.authenticate(flight_number, flightHash):
         abort(401)
 
+    flight_id = Controller.getFlightByNumber(flight_number)
+
     if json_request.has_key("data"):
         # Controller.checkEventJsonData(json_request["data"])
         Controller.saveNewEvent(flight_number,event,json_request["data"])
+        observer.update(flight_id)
         # WebController.refreshSite(flight_number)
 
     return "OK", 201
+
+
+@app.route('/api/chart/<int:flight_id>/<string:value>', methods=['POST', 'GET'])
+def api_chart_getValues(flight_id, value):
+    chartData = Controller.getChartData(flight_id, value)
+
+    LOG.debug(chartData)
+
+    import json_tricks
+    data = json_tricks.dumps(chartData, primitives=True)
+    return data
 
 
 # -------- SOCKETS ---------
@@ -218,4 +245,13 @@ def balloonUpdate():
     LOG.info("Client connected")
     emit('message', {'data': '[Server]: You have been connected.'})
     global thread
+
+@socketio.on('join', namespace='/map')
+def socket_join(data):
+    LOG.debug(data["flight"])
+    flightNumber = data["flight"]
+    flight = Controller.getFlightByNumber(flightNumber)
+    join_room(flight.id)
+    LOG.debug(flask_socketio.rooms())
+    emit('message', {'data': 'Subscribed for flight #{}'.format(flightNumber)}, namespace="/map")
 

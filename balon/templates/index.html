@@ -31,6 +31,15 @@
     console.log("Debug Values:");
     console.log(balloonData);
 
+    // http://stackoverflow.com/a/31003742
+    var params = window.location.search.substring(1).split("&").map(v => v.split("=")).reduce((map, [key, value]) => map.set(key, decodeURIComponent(value)), new Map());
+    var flightNumber;
+    if( params.get("flight") == null ) {
+      flightNumber = 42;
+    } else {
+      flightNumber = params.get("flight");
+    }
+
     var icons = {
       balloon: "{{ url_for('static',filename='img/airballoon.png') }}",
       burst: "{{ url_for('static',filename='img/explosion.png') }}",
@@ -159,19 +168,20 @@
       var socket = io.connect(socketURL);
 
       socket.on('connect', function() {
-        console.log("connected");
-          socket.emit('my_event');
+        console.log("[Socket]: Connected");
+        // socket.emit('my_event');
+        socket.emit('join', {flight:flightNumber});
       });
       
       socket.on('message', function(data) {
-        console.log("Message from Socket: " + data.data);
+        console.log("[Server]: " + data.data);
       });
 
-      socket.on('baloon_update', function(data) {
+      socket.on('balloon_update', function(data) {
 
-          console.log("Socket data received: ", data);
+          console.log("[Server]: ", data);
           
-          var message = JSON.parse(data);
+          var message = data;
 
           console.log("JSON message: ", message);
 
