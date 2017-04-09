@@ -5,6 +5,7 @@ import MySQLdb
 from flask_sqlalchemy import get_debug_queries
 
 from balon import app
+from balon.database import DBConnector
 
 from balon.models.Flight import Flight
 from balon.models.Parameter import Parameter
@@ -20,22 +21,37 @@ handler.setLevel(app.config['LOGGING_LEVEL'])
 LOG.addHandler(handler)
 LOG.setLevel(logging.DEBUG)
 
-
 if (app.config['LOGGING_CONSOLE_DB']):
     streamHandler = logging.StreamHandler()
     streamHandler.setLevel(app.config['LOGGING_LEVEL_CONSOLE'])
     streamHandler.setFormatter(formatter)
     # app.logger.addHandler(streamHandler)
     LOG.addHandler(streamHandler)
-    
+
+
+def mysql_error_handler_decorator(func):
+    def func_wrapper(*args, **kwargs):
+        LOG.debug("mysql_error_handler_decorator")
+        try:
+            res = func(*args, **kwargs)
+        except MySQLdb.OperationalError as e:
+            if e[0] == 2006:
+                LOG.error("MySQL database connection timeout.")
+                DBConnector.connect_db(app)
+            res = func(*args, **kwargs)
+        return res
+    return func_wrapper
+
+
 # -------------------------
 #      Flight
 # -------------------------
 
+@mysql_error_handler_decorator
 def getFlightByKey(key, value):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM flight " \
-                "WHERE {} = {} LIMIT 1".format(key,value)
+                "WHERE {} = {} LIMIT 1".format(key, value)
 
         LOG.debug(query)
         cur.execute(query)
@@ -45,6 +61,7 @@ def getFlightByKey(key, value):
     return Flight(fromDB=p)
 
 
+@mysql_error_handler_decorator
 def getFlightById(flight_id):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         # query = "SELECT * FROM flight WHERE id = '%s' LIMIT 1"
@@ -58,6 +75,7 @@ def getFlightById(flight_id):
     return Flight(fromDB=p)
 
 
+@mysql_error_handler_decorator
 def getFlightAll():
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM flight"
@@ -76,6 +94,7 @@ def getFlightAll():
     return flights
 
 
+@mysql_error_handler_decorator
 def saveFlight(flight):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO flight ({},{},{}) " \
@@ -96,6 +115,7 @@ def saveFlight(flight):
         return cur.lastrowid
 
 
+@mysql_error_handler_decorator
 def updateFlight(flight):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "UPDATE flight " \
@@ -118,6 +138,7 @@ def updateFlight(flight):
         return cur.lastrowid
 
 
+@mysql_error_handler_decorator
 def deleteFlight(flight):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "DELETE FROM flight " \
@@ -140,6 +161,7 @@ def deleteFlight(flight):
 #      Event
 # -------------------------
 
+@mysql_error_handler_decorator
 def saveEvent(event):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO event ({},{},{}) " \
@@ -159,6 +181,8 @@ def saveEvent(event):
 
         return cur.lastrowid
 
+
+@mysql_error_handler_decorator
 def bindParameterToEvent(param_id, event_id):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO param_event (parameter_id,event_id) " \
@@ -176,6 +200,8 @@ def bindParameterToEvent(param_id, event_id):
 
         return cur.lastrowid
 
+
+@mysql_error_handler_decorator
 def getEventsByFlight(flight_id):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM event " \
@@ -208,6 +234,7 @@ def getEventsByFlight(flight_id):
 #      Parameter
 # -------------------------
 
+@mysql_error_handler_decorator
 def saveParameter(parameter):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO parameter ({},{},{},{})" \
@@ -229,6 +256,7 @@ def saveParameter(parameter):
         return cur.lastrowid
 
 
+@mysql_error_handler_decorator
 def getParametersByFlight(flight_id):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
@@ -259,6 +287,7 @@ def getParametersByFlight(flight_id):
     return parameters
 
 
+@mysql_error_handler_decorator
 def getParametersByEvent(event_id):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
@@ -289,6 +318,7 @@ def getParametersByEvent(event_id):
     return parameters
 
 
+@mysql_error_handler_decorator
 def getParametersByKeyByFlight(key, value, flight_id, order="ASC"):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
@@ -318,6 +348,7 @@ def getParametersByKeyByFlight(key, value, flight_id, order="ASC"):
     return parameters
 
 
+@mysql_error_handler_decorator
 def getParameterLastByFlight(key, value, flight_id):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
@@ -344,6 +375,7 @@ def getParameterLastByFlight(key, value, flight_id):
     return param
 
 
+@mysql_error_handler_decorator
 def getParameterFirstByFlight(key, value, flight_id):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "SELECT * FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
@@ -374,6 +406,7 @@ def getParameterFirstByFlight(key, value, flight_id):
 #      Parameter
 # -------------------------
 
+@mysql_error_handler_decorator
 def saveValue(value, parameter_id):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "INSERT INTO value ({},{},{},{}) " \
@@ -394,6 +427,8 @@ def saveValue(value, parameter_id):
 
         return cur.lastrowid
 
+
+@mysql_error_handler_decorator
 def getParameterTypes(flight_id):
     query = "SELECT type FROM parameter WHERE flight_id = '{}' GROUP BY type".format(flight_id)
 
@@ -410,9 +445,10 @@ def getParameterTypes(flight_id):
     return types
 
 
+@mysql_error_handler_decorator
 def getValueTypesByParameter(flight_id, type):
     query = "SELECT name FROM parameter LEFT JOIN value AS value_1 ON value_1.parameter_id = parameter.id " \
-            "WHERE flight_id = {} AND type = '{}' GROUP BY value_1.name".format(flight_id,type)
+            "WHERE flight_id = {} AND type = '{}' GROUP BY value_1.name".format(flight_id, type)
 
     types = None
 

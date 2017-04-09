@@ -54,11 +54,8 @@ socketio = SocketIO(app, async_mode=async_mode)
 
 LOG.debug("Starting flask app __init__.py")
 
-LOG.debug("Connection to database: %s@%s", app.config["MYSQL_DATABASE_DB"], app.config["MYSQL_DATABASE_HOST"])
-app.mysql = MySQLdb.connect(host=app.config["MYSQL_DATABASE_HOST"],
-                            user=app.config["MYSQL_DATABASE_USER"],
-                            passwd=app.config["MYSQL_DATABASE_PASSWORD"],
-                            db=app.config["MYSQL_DATABASE_DB"])
+from balon.database import DBConnector
+DBConnector.connect_db(app)
 
 # TODO Test Database connection
 
