@@ -3,8 +3,9 @@
 # Flask imports
 from datetime import datetime
 
+import flask_socketio
 from flask import Flask, render_template, request, url_for, current_app, jsonify, abort, redirect, flash
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 
 import json
 
