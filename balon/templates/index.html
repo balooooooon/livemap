@@ -158,7 +158,7 @@
 
     $(document).ready(function () {
       // var socketURL = 'http://' + document.domain + ':' + location.port + "balon/map";
-      var socketURL = 'http://' + document.domain + "/balon/map";
+      var socketURL = location.origin + "/map";
       console.log("connect to : " + socketURL);
       /*
       io.configure(function () {
