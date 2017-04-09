@@ -31,10 +31,22 @@
     console.log("Debug Values:");
     console.log(balloonData);
 
+    // http://stackoverflow.com/a/31003742
+    var params = window.location.search.substring(1).split("&").map(v => v.split("=")).reduce((map, [key, value]) => map.set(key, decodeURIComponent(value)), new Map());
+    var flightNumber;
+    if( params.get("flight") == null ) {
+      flightNumber = 42;
+    } else {
+      flightNumber = params.get("flight");
+    }
+
     var icons = {
       balloon: "{{ url_for('static',filename='img/airballoon.png') }}",
       burst: "{{ url_for('static',filename='img/explosion.png') }}",
-      start: "{{ url_for('static',filename='img/launched-rocket.png') }}"
+      start: "{{ url_for('static',filename='img/launched-rocket.png') }}",
+      //TO DO : add icon for landing 
+      land: "{{ url_for('static',filename='img/landingPredicted.png') }}",
+      landingPredicted: "{{ url_for('static',filename='img/landing-predicted.png') }}"
     }
 
     var map;
@@ -53,6 +65,9 @@
 
     var landingPosition;
     var landingMarker;
+
+    var landingPredictedPosition;
+    var landingPredictedMarker;
 
     function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -83,8 +98,14 @@
           icon: icons.start,
           map: map
         })
-
+        //TODO Change
         landingMarker = new google.maps.Marker({
+          icon: icons.landingPredicted,
+          map: map
+        })
+
+        landingPredictedMarker = new google.maps.Marker({
+          icon: icons.landingPredicted,
           map: map
         })
 
@@ -118,6 +139,10 @@
           landingPosition = setMarkerPosition(landingPosition,landingMarker,balloonData.landing.point,null);
         }
 
+        if( "landingPredicted" in balloonData ) {
+          landingPredictedPosition = setMarkerPosition(landingPredictedPosition,landingPredictedMarker,balloonData.landingPredicted.point,null);
+        }
+
         path.setMap(map);
 
         pathPredicted.setMap(map);
@@ -127,13 +152,13 @@
         }
 
         if( "predictedPath" in balloonData ) {
-          setPath(pathPredicted,balloonData.predictedPath);
+          setPath(pathPredicted,balloonData.predictedPath.data.points,"new");
         }
       }
 
     $(document).ready(function () {
       // var socketURL = 'http://' + document.domain + ':' + location.port + "balon/map";
-      var socketURL = 'http://' + document.domain + "/balon/map";
+      var socketURL = location.origin + "/map";
       console.log("connect to : " + socketURL);
       /*
       io.configure(function () {
@@ -143,19 +168,20 @@
       var socket = io.connect(socketURL);
 
       socket.on('connect', function() {
-        console.log("connected");
-          socket.emit('my_event');
+        console.log("[Socket]: Connected");
+        // socket.emit('my_event');
+        socket.emit('join', {flight:flightNumber});
       });
       
       socket.on('message', function(data) {
-        console.log("Message from Socket: " + data.data);
+        console.log("[Server]: " + data.data);
       });
 
-      socket.on('baloon_update', function(data) {
+      socket.on('balloon_update', function(data) {
 
-          console.log("Socket data received: ", data);
+          console.log("[Server]: ", data);
           
-          var message = JSON.parse(data);
+          var message = data;
 
           console.log("JSON message: ", message);
 

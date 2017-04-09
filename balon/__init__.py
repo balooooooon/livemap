@@ -1,18 +1,26 @@
 # ----------------- IMPORTS -----------------
 
 # Flask imports
+import MySQLdb
 from flask import Flask
 from flask_socketio import SocketIO
-from flask_sqlalchemy import SQLAlchemy
 import logging
 
 # ----------------- IMPORTS -----------------
+
+from balon.controller.BalloonObserver import BalloonObserver
+# from balon.controller.SocialController import SocialController
+# from balon.controller.SocketController import SocketController
 
 app = Flask(__name__)
 
 # http://stackoverflow.com/questions/15603240/flask-how-to-manage-different-environment-databases
 # Nacita config zo suboru config.py
-app.config.from_object('config.ProductionConfig')
+
+if app.config["TESTING"]:
+    app.config.from_object('config.TestingConfig')
+else:
+    app.config.from_object('config.DevelopConfig')
 
 # Ak je vytvorena premenna prostredia BALLOON_CONFIG, prepise config vyssie
 app.config.from_envvar('BALLOON_CONFIG', silent=True)
@@ -40,16 +48,26 @@ if (app.config['LOGGING_CONSOLE']):
 
 LOG.setLevel(logging.DEBUG)
 
-# LOG.debug("Database Path: %s", app.config["DATABASE"])
 
 async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
 
 LOG.debug("Starting flask app __init__.py")
 
-db = SQLAlchemy(app)
+from balon.database import DBConnector
+DBConnector.connect_db(app)
+
+# TODO Test Database connection
+
+
+observer = BalloonObserver()
+#socialController = SocialController()
+#socketController = SocketController()
+#observer.register(socialController)
+#observer.register(socketController)
 
 import main
+
 
 @app.route('/')
 def hello_world():

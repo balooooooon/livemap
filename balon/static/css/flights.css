@@ -38,3 +38,25 @@
 #flights_add {
 	margin: 50px auto
 }
+
+.chartParameter-name {
+	border: 1px solid gray;
+    border-radius: 3px;
+    box-shadow: 2px 2px 5px -2px grey;
+    background-color: #eee;
+    padding: 0.3em;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.chartValue-name {
+	border: 1px solid gray;
+    border-radius: 3px;
+    box-shadow: 2px 2px 5px -2px grey;
+    background-color: #eee;
+    padding: 0.3em;
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 10px 0px;
+    margin-left: 10px;
+}

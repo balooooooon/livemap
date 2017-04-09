@@ -4,6 +4,95 @@
 <meta charset="UTF-8">
 	<title>Flight Detail</title>
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/flights.css') }}">
+
+	<!-- Probably download jQuery to static -->
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="//code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script> -->
+
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+	<!-- Chart.js -->
+	<!-- 
+	<script src="//www.chartjs.org/assets/Chart.min.js"></script> 
+	-->
+	
+	<!-- Dygraphs -->
+	<!-- 	
+	<script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/2.0.0/dygraph.min.js"></script>
+	<link rel="stylesheet" src="//cdnjs.cloudflare.com/ajax/libs/dygraph/2.0.0/dygraph.min.css" /> 
+	-->
+	
+	<script type="text/javascript">
+		var cacheData = {};	
+
+		var balloonData = JSON.parse({{balloonData|tojson}});
+	    console.log("Debug Values:");
+    	//console.log(balloonData);
+		//console.log( "Chart Data: " + JSON.parse({{chartData|tojson}}) );
+
+		// Load the Visualization API and the corechart package.
+		google.charts.load('current', {'packages':['corechart']});
+
+		// Set a callback to run when the Google Visualization API is loaded.
+		var googleChartData;
+		var chart;
+		
+		google.charts.setOnLoadCallback(drawChart);
+
+		// Callback that creates and populates a data table,
+		// instantiates the pie chart, passes in the data and
+		// draws it.
+		function drawChart(init=true) {
+
+		// Set chart options
+		var options = {'title':'Flight chart',
+		               'height':500,
+		               'curveType': 'function'};
+
+		// Instantiate and draw our chart, passing in some options.
+		chart = new google.visualization.LineChart(document.getElementById('graph_altitude'));
+
+		if (!init) {
+			chart.draw(googleChartData, options);
+			return;
+		};
+
+		googleChartData = new google.visualization.DataTable();
+
+		// Create the data table.
+		googleChartData.addColumn('string', 'Time');
+		googleChartData.addColumn('number', 'Interior Temp');
+		googleChartData.addColumn('number', 'Exterior Temp');
+
+		//var dyData = [];
+
+		for (i in balloonData) {
+		    p = balloonData[i];
+		    if ( p.type == "temperature" ) {
+                interiorTemp = p.values["in"].value;
+                exteriorTemp = p.values["out"].value;
+                time = p.time_received;
+                var tt = new Date(time);
+                googleChartData.addRow([tt.toLocaleTimeString(),interiorTemp,exteriorTemp]);
+            	//dyData.push([tt,interiorTemp,exteriorTemp]);
+            }
+		}
+
+		// ---- Dygraphs
+		//console.log(dyData);
+		//var g = new Dygraph(
+    	//	document.getElementById("graph_dygraphs"),
+    	//	dyData
+    	//	 );
+		// ---- Dygraphs
+
+		chart.draw(googleChartData, options);
+		}
+
+    </script>
 </head>
 <body>
 
@@ -12,6 +101,104 @@
 		<h1>Flight #{{ flight.number }}</h1>
 		<h3>Start date: {{ flight.start_date|format_datetime }}</h3>
 		<h3>Hash: {{ flight.hash }}</h3>
+	</div>
+	<div class="flight_graphs">
+		<!--<div id="graph_dygraphs" style="width: 800px; height:500px"></div>-->
+		<div id="graph_altitude" style="height: 500px; width: 80%; float: left">
+		</div>
+		<div id="graph_controls" style="height: 500px; width: 18%; float: right;">
+			{% if chartData %}
+				<fieldset>
+				{% for param in chartData %}
+				<div class="chartParameter">
+					
+					<div class="chartParameter-name">{{ param["type"] }}</div>
+					{% for val in param["values"] %}
+						<div class="chartValue">
+							<label for='chartValue-{{param["type"]}}-{{val[0]}}'>{{ val[0] }}</label>
+							<input class="chartValue-input" type="checkbox" id='chartValue-{{param["type"]}}-{{val[0]}}' name='chartValue-{{param["type"]}}-{{val[0]}}'>
+						</div>
+					{% endfor %}
+				</div>
+				{% endfor %}
+				</fieldset>
+			{% endif %}
+		</div>
+		<script type="text/javascript">
+			$(document).ready(function(){
+			    $( function() {
+					$( ".chartValue-input" ).checkboxradio();
+					$( "#graph_controls").find("> fieldset" ).controlgroup();
+				} );
+
+			    function handleChartLine(value) {
+			    	if( cacheData[value] != null ) {
+	    				console.log("Already retrieved.");
+	    				var data = cacheData[value];
+	    				showChartLine(data,value);
+	    			} else {
+	    				loadChartLineData(value);
+	    			}
+			    }
+
+			    function loadChartLineData(value) {
+			    	$.ajax( {
+						url: 'http://' + document.domain + ":5000/api/chart/{{flight.id}}/" + value,
+						cache: false
+					} ).done(function(result) {
+							console.log(JSON.parse(result));
+							cacheData[value] = JSON.parse(result);
+	    					showChartLine(cacheData[value],value);
+						})
+						.fail(function() {
+							alert( "error" );
+						})
+						.always(function() {
+							console.log( "complete" );
+						});
+			    }
+
+				function showChartLine(data,value) {
+					googleChartData.removeColumns(0, googleChartData.getNumberOfColumns());
+					googleChartData.removeRows(0, googleChartData.getNumberOfRows());
+					googleChartData.addColumn('string', 'Time');
+					googleChartData.addColumn('number', value);
+					console.log(data.length);
+					for ( i in data ) {
+						p = data[i];
+						var v = p.val.value;
+						exteriorTemp = p.val.value;
+						time = p.time_received;
+						var tt = new Date(time);
+						googleChartData.addRow([tt.toLocaleTimeString(),v]);
+			        }
+			        console.log(googleChartData);
+			        drawChart(false);
+				}
+
+				function hideChartLine(parameter,value) {
+
+				}
+
+			    function handleChartToggle( e) {
+			    	var target = $(e.target);
+
+			    	if ( target.is(".chartValue-input") ) {
+			    		var id = target.attr("id").split("-");
+			    		if (target.is(":checked")) {
+			    			console.log("Show line: " + id);
+			    			handleChartLine(id[2]);
+			    		} else {
+			    			console.log("Hide Line: " + id);
+			    			hideChartLine(id[1],id[2]);
+			    		}
+			    	} 
+			    }
+
+			    $(".chartValue-input").on("change", handleChartToggle);
+			});
+			
+		</script>
 	</div>
 	<div class="flight_parameters">
 		{% if parameters %}
@@ -30,7 +217,7 @@
 						<td>{{ parameter.time_created|format_datetime }}</td>
 						<td>
 							{% for val in parameter.values %}
-								{{ val.name }}: {{ val.value }}<br>
+								{{ parameter.values[val].name }}: {{ parameter.values[val].value }}<br>
 							{% endfor %}
 						</td>
 					</tr>
