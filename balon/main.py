@@ -2,11 +2,7 @@
 
 # Flask imports
 from datetime import datetime
-
-import flask_socketio
 from flask import Flask, render_template, request, url_for, current_app, jsonify, abort, redirect, flash
-from flask_socketio import SocketIO, emit, join_room
-
 import json
 
 # Controller
@@ -226,33 +222,4 @@ def api_chart_getValues(flight_id, value):
     data = json_tricks.dumps(chartData, primitives=True)
     return data
 
-
-# -------- SOCKETS ---------
-
-@socketio.on('my_event', namespace='/socket/')
-def sendMessage():
-    emit('message', {'data': 'my data'})
-
-
-@socketio.on('connect', namespace='/socket/')
-def test_connect():
-    LOG.info("Connected.")
-    emit('message', {'data': 'Connected to Socket'})
-    LOG.debug("Message sent.")
-
-
-@socketio.on('connect', namespace='/map')
-def balloonUpdate():
-    LOG.info("Client connected")
-    emit('message', {'data': '[Server]: You have been connected.'})
-    global thread
-
-@socketio.on('join', namespace='/map')
-def socket_join(data):
-    LOG.debug(data["flight"])
-    flightNumber = data["flight"]
-    flight = Controller.getFlightByNumber(flightNumber)
-    join_room(flight.id)
-    LOG.debug(flask_socketio.rooms())
-    emit('message', {'data': 'Subscribed for flight #{}'.format(flightNumber)}, namespace="/map")
 

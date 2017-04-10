@@ -1,3 +1,6 @@
+from flask_socketio import emit, join_room
+
+from balon.controller import Controller
 from balon.controller.IBalloonSubject import IBalloonSubject
 from balon import socketio, LOG
 
@@ -33,7 +36,7 @@ class SocketController(IBalloonSubject):
 
         p = {
             "time": time.mktime(lastPosition.time_received.timetuple()),
-            "lat":lastPosition.values["lat"].value,
+            "lat": lastPosition.values["lat"].value,
             "lng": lastPosition.values["lng"].value,
             "alt": lastPosition.values["alt"].value
         }
@@ -43,3 +46,34 @@ class SocketController(IBalloonSubject):
         socketio.emit('message', {'data': 'Triggered message from SocketController'}, room=flight_id, namespace="/map")
         socketio.emit('balloon_update', msg, room=flight_id, namespace="/map")
         LOG.debug("Room message emited.")
+
+
+# -------- SOCKETS ---------
+
+@socketio.on('my_event', namespace='/socket/')
+def sendMessage():
+    emit('message', {'data': 'my data'})
+
+
+@socketio.on('connect', namespace='/socket/')
+def test_connect():
+    LOG.info("Connected.")
+    emit('message', {'data': 'Connected to Socket'})
+    LOG.debug("Message sent.")
+
+
+@socketio.on('connect', namespace='/map')
+def balloonUpdate():
+    LOG.info("Client connected")
+    emit('message', {'data': '[Server]: You have been connected.'})
+    global thread
+
+
+@socketio.on('join', namespace='/map')
+def socket_join(data):
+    LOG.debug(data["flight"])
+    flightNumber = data["flight"]
+    flight = Controller.getFlightByNumber(flightNumber)
+    join_room(flight.id)
+    # LOG.debug(flask_socketio.rooms())
+    emit('message', {'data': 'Subscribed for flight #{}'.format(flightNumber)}, namespace="/map")
