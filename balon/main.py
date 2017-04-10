@@ -16,12 +16,10 @@ LOG.debug("Starting flask app main.py")
 
 @app.route('/map')
 def balloonDashboard():
-    # balloonStatus =
 
-    # TODO Try/catch encode() and int()
     if request.args.has_key("flight"):
         num = request.args.get("flight")
-        num = num.encode('ascii','ignore')
+        num = num.encode('ascii', 'ignore')
         if num.isdigit():
             flight_number = int(num)
             LOG.debug("Custom flight number: %d", flight_number)
@@ -60,7 +58,6 @@ def balloonDashboard():
     flightList = Controller.getFlightList()
     if flightList:
         data['flightList'] = flightList
-
 
     # balloonTelemetry = getActualTelemetry()
 

@@ -1,9 +1,8 @@
 # ----------------- IMPORTS -----------------
 
-# Flask imports
+import logging
 from flask import Flask
 from flask_socketio import SocketIO
-import logging
 from balon.controller.BalloonObserver import BalloonObserver
 
 # ----------------- IMPORTS -----------------
@@ -23,27 +22,21 @@ app.config.from_envvar('BALLOON_CONFIG', silent=True)
 
 # --- Configure logging ---
 
-# app.logger = logging.getLogger("My Logger")
 LOG = logging.getLogger(app.config['LOGGING_LOGGER'])
 
 handler = logging.FileHandler(app.config['LOGGING_LOCATION'])
 formatter = logging.Formatter(app.config['LOGGING_FORMAT'])
 handler.setLevel(app.config['LOGGING_LEVEL'])
 handler.setFormatter(formatter)
-# app.logger.addHandler(handler)
 LOG.addHandler(handler)
 
 if (app.config['LOGGING_CONSOLE']):
     streamHandler = logging.StreamHandler()
     streamHandler.setLevel(app.config['LOGGING_LEVEL_CONSOLE'])
     streamHandler.setFormatter(formatter)
-    # app.logger.addHandler(streamHandler)
     LOG.addHandler(streamHandler)
 
-# app.logger.propagate = False
-
 LOG.setLevel(logging.DEBUG)
-
 
 async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
