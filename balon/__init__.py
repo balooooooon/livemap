@@ -69,6 +69,7 @@ socketController = SocketController()
 observer.register(socketController)
 
 import main
+import api
 
 
 @app.route('/')
