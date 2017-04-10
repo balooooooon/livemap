@@ -10,6 +10,12 @@
 	<script src="//code.jquery.com/jquery-1.12.4.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
+	<!-- DataTables -->
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.css">
+	<!-- DataTables -->
+
 	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script> -->
 
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -28,6 +34,8 @@
 	<script type="text/javascript">
 		var cacheData = {};	
 
+		var parametersTable;
+		var eventsTable;
 		var balloonData = JSON.parse({{balloonData|tojson}});
 	    console.log("Debug Values:");
     	//console.log(balloonData);
@@ -91,6 +99,17 @@
 
 		chart.draw(googleChartData, options);
 		}
+
+		$(document).ready(function () {
+		    if ( $("#parameters_table").length ){
+                parametersTable = $("#parameters_table").DataTable();
+            }
+
+            if ( $("#events_table").length ){
+                eventsTable = $("#events_table").DataTable();
+            }
+
+        })
 
     </script>
 </head>
@@ -203,13 +222,13 @@
 	<div class="flight_parameters">
 		{% if parameters %}
 			<h2>Parameters</h2>
-			<table>
-				<tr>
-					<td>ID</td>
-					<td>Type</td>
-					<td>Time Created</td>
-					<td>Values</td>
-				</tr>
+			<table id="parameters_table" class="stripe compact hover row-border">
+				<thead>
+					<th>ID</th>
+					<th>Type</th>
+					<th>Time Created</th>
+					<th>Values</th>
+				</thead>
 				{% for parameter in parameters %}
 					<tr>
 						<td>{{ parameter.id }}</td>
@@ -231,7 +250,12 @@
     <div class="flight_parameters">
         {% if events %}
         	<h2>Events</h2>
-			<table>
+			<table id="events_table" class="stripe compact hover row-border">
+				<thead>
+					<th>ID</th>
+					<th>Type</th>
+					<th>Time Created</th>
+				</thead>
 				{% for event in events%}
 					<tr>
 						<td>{{ event.id }}</td>

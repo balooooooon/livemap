@@ -3,7 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <title>Flights</title>
+
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/flights.css') }}">
+	<script type="text/javascript" src="{{ url_for('static',filename='js/mapHelper.js') }}"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+
+	<!-- DataTables -->
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.css">
+	<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
+	<!-- DataTables -->
+
+    <script>
+		var table;
+		$(document).ready(function () {
+
+            table = $("#flights_table").DataTable();
+
+		    $("#flights_add").submit(function (event) {
+		        event.preventDefault();
+                var json = new Object();
+                json.number = $("#flights_add input[name=flightNumber]").val();
+                json.startDate = $("#flights_add input[name=flightStartDate]").val();
+
+                var jsonString = JSON.stringify(json);
+
+                $.ajax({
+                    url: location.origin + "/api/flight",
+                    contentType: "application/json",
+                    dataType: "json",
+                    method: "POST",
+                    data: jsonString
+                }).done(function (response) {
+                    console.log(response);
+                    addFlightRow(response);
+                })
+            });
+
+			$('#flights_table').find('tbody').on( 'click', 'button', function () {
+				var row = table.row( $(this).parents('tr') );
+				var data = row.data();
+
+				console.log("presssed " + data);
+
+				$.ajax({
+					url: location.origin + "/api/flight/" + data[0],
+					contentType: "application/json",
+					dataType: "json",
+					method: "DELETE"
+				}).done(function (response) {
+					row.remove();
+					table.draw();
+					console.log(response);
+				});
+
+				console.log("Flight with ID: " + data[0] + " removed");
+    		} );
+
+		});
+
+		function addFlightRow(flight) {
+			table.row.add(
+			    [
+					flight.id,
+                    "<a href='"+flight.webUrls.detail+"'>"+flight.number+"</a>",
+                    flight.hash,
+					formatDateTime(flight.start_date),
+					"<button class='delete'>Delete</button>"
+				]
+			).draw();
+        }
+
+
+	</script>
 </head>
 <body>
 	<div id="flight_wrapper">
@@ -13,27 +84,31 @@
 			<input type="text" name="flightNumber"><br>
 			Start Date:<br>
 			<input type="datetime-local" name="flightStartDate"><br>
-			<input type="submit" name="Save">
+			<input type="submit" name="Save" id>
 		</form>
 
 		{% if flights %}
 			<table id="flights_table">
-				<tr>
-					<td>ID</td>
-					<td>#</td>
-					<td>Hash</td>
-					<td>Start date</td>
-					<td>Delete</td>
-				</tr>
-			{% for flight in flights %}
-				<tr>
-					<td>{{ flight.id }}</td>
-					<td><a href="{{ url_for('flight_detail',flight_id=flight.id) }}">{{ flight.number }}</a></td>
-					<td>{{ flight.hash }}</td>
-					<td>{{ flight.start_date|format_datetime }}</td>
-					<td><a href="{{ url_for('delete_flight',flight_id=flight.id) }}">Delete</a></td>
-				</tr>
-			{% endfor %}
+				<thead>
+					<th>ID</th>
+					<th>#</th>
+					<th>Hash</th>
+					<th>Start date</th>
+					<th>Delete</th>
+				</thead>
+				<tbody>
+
+				{% for flight in flights %}
+					<tr>
+						<td>{{ flight.id }}</td>
+						<td><a href="{{ url_for('flight_detail',flight_id=flight.id) }}">{{ flight.number }}</a></td>
+						<td>{{ flight.hash }}</td>
+						<td>{{ flight.start_date|format_datetime }}</td>
+						<td><button class="delete">Delete</button></td>
+					</tr>
+				{% endfor %}
+
+				</tbody>
 			</table>
 		{% else %}
 			<h3>No Flights.</h3>

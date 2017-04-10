@@ -15,7 +15,7 @@
 }
 
 .flight_parameters table tr:nth-child(odd){
-	background-color: #eee;
+	/* background-color: #eee; */
 }
 
 .flight_parameters tr {
