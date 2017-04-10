@@ -1,10 +1,6 @@
 class BalloonObserver(object):
     def __init__(self):
         self.__subjects = []
-        from balon.controller.SocketController import SocketController
-        self.register(SocketController())
-        from balon.controller.SocialController import SocialController
-        self.register(SocialController())
 
     def register(self, subject):
         self.__subjects.append(subject)

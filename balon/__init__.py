@@ -5,12 +5,9 @@ import MySQLdb
 from flask import Flask
 from flask_socketio import SocketIO
 import logging
+from balon.controller.BalloonObserver import BalloonObserver
 
 # ----------------- IMPORTS -----------------
-
-from balon.controller.BalloonObserver import BalloonObserver
-# from balon.controller.SocialController import SocialController
-# from balon.controller.SocketController import SocketController
 
 app = Flask(__name__)
 
@@ -58,13 +55,18 @@ from balon.database import DBConnector
 DBConnector.connect_db(app)
 
 # TODO Test Database connection
-
-
+# --- Observer initialization
 observer = BalloonObserver()
-#socialController = SocialController()
-#socketController = SocketController()
-#observer.register(socialController)
-#observer.register(socketController)
+
+from balon.controller.SocialController import SocialController
+
+socialController = SocialController()
+observer.register(socialController)
+
+from balon.controller.SocketController import SocketController
+
+socketController = SocketController()
+observer.register(socketController)
 
 import main
 
