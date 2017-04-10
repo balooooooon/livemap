@@ -24,6 +24,7 @@ class Config(object):
 
     LOGGING_LOGGER = "Balon Logger"
     LOGGING_LOGGER_DB = "DB Logger"
+    LOGGING_LOGGER_API = "API Logger"
 
     LOGGING_FORMAT = '%(asctime)s - %(name)s [%(levelname)s] %(module)s.%(funcName)s(): %(message)s'
     LOGGING_LOCATION = 'balooooooon.log'
