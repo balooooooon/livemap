@@ -3,13 +3,24 @@ from balon import LOG
 
 
 def connect_db(app):
-    """Database connection"""
+    """
+    Initializes database connection
+    @param app: Flask application object
+    @return: MySQLdb.Connection
+    """
     LOG.info("Connecting to database: %s@%s", app.config["MYSQL_DATABASE_DB"], app.config["MYSQL_DATABASE_HOST"])
-    app.mysql = MySQLdb.connect(host=app.config["MYSQL_DATABASE_HOST"],
-                                user=app.config["MYSQL_DATABASE_USER"],
-                                passwd=app.config["MYSQL_DATABASE_PASSWORD"],
-                                db=app.config["MYSQL_DATABASE_DB"])
+    try:
+        app.mysql = MySQLdb.connect(host=app.config["MYSQL_DATABASE_HOST"],
+                                    user=app.config["MYSQL_DATABASE_USER"],
+                                    passwd=app.config["MYSQL_DATABASE_PASSWORD"],
+                                    db=app.config["MYSQL_DATABASE_DB"])
+    except MySQLdb.OperationalError as e:
+        LOG.error(e)
+        LOG.critical("Can't connect to MySQL database")
+        return None
+
     return app.mysql
+
 
 # def init_db():
 #     """Initializes the database."""
@@ -20,6 +31,11 @@ def connect_db(app):
 
 
 def get_db(app):
+    """
+    Returns MySQL Connection object
+    @param app: Flask application object
+    @return: MySQLdb.Connection
+    """
     return app.mysql
 
 #

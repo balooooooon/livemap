@@ -1,7 +1,6 @@
 # ----------------- IMPORTS -----------------
 
 # Flask imports
-import MySQLdb
 from flask import Flask
 from flask_socketio import SocketIO
 import logging
@@ -51,10 +50,11 @@ socketio = SocketIO(app, async_mode=async_mode)
 
 LOG.debug("Starting flask app __init__.py")
 
+# --- Database connection ---
 from balon.database import DBConnector
+
 DBConnector.connect_db(app)
 
-# TODO Test Database connection
 # --- Observer initialization
 observer = BalloonObserver()
 
