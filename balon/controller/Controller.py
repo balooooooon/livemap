@@ -182,6 +182,9 @@ def saveNewFlight(number, datetime):
     return service.saveNewFlight(flight)
     # Save new Flight object
 
+def deleteFlight(flight_id):
+    res = service.deleteFlightById(flight_id)
+    return res
 
 def getFlightById(flight_id):
     flight = service.getFlightById(flight_id)

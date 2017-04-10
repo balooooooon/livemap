@@ -139,10 +139,10 @@ def updateFlight(flight):
 
 
 @mysql_error_handler_decorator
-def deleteFlight(flight):
+def deleteFlight(flight_id):
     with closing(app.mysql.cursor(MySQLdb.cursors.SSDictCursor)) as cur:
         query = "DELETE FROM flight " \
-                "WHERE id = {}".format(flight.id)
+                "WHERE id = {}".format(flight_id)
 
         LOG.debug(query)
 

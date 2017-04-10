@@ -33,6 +33,9 @@ def getFlightByNumber(flight_number):
 def saveNewFlight(flight):
     return dao.saveFlight(flight)
 
+def deleteFlightById(flight_id):
+    return dao.deleteFlight(flight_id)
+
 
 def getFlightAll():
     flights = dao.getFlightAll()
@@ -251,3 +254,5 @@ def getChartData(flight_id, value):
         x["val"] = p.values[value]
         result.append(x)
     return result
+
+
