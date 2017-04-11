@@ -8,6 +8,7 @@ from balon.controller.BalloonObserver import BalloonObserver
 # ----------------- IMPORTS -----------------
 
 app = Flask(__name__)
+app.mysql = None
 
 # http://stackoverflow.com/questions/15603240/flask-how-to-manage-different-environment-databases
 # Nacita config zo suboru config.py

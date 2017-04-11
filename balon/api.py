@@ -36,6 +36,9 @@ def api_dumbjson():
 
 @app.route('/api/mirror', methods=['POST'])
 def api_mirror():
+    """ Just for testing. Return same JSON as received
+    @return:
+    """
     if request.method == 'POST':
         # LOG.debug("API MIRROR: {}".format(request.get_json(force=False, silent=False, cache=False)))
         return jsonify(request.get_json(force=False, silent=False, cache=False))
@@ -43,6 +46,9 @@ def api_mirror():
 
 @app.route('/api/test', methods=['GET', 'POST'])
 def api_test():
+    """ Ping test
+    @return:
+    """
     LOG.debug("API TEST")
     return "TEST", 202
 

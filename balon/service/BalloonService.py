@@ -10,9 +10,15 @@ import hashlib
 from datetime import datetime
 
 
-
 def getValueUnit(type):
+    """ Returns unit type based on specified value type
+    @param type: Value type
+    @type type: string
+    @return: Value unit
+    @rtype: string
+    """
     # TODO
+    LOG.critical("getValueUnit NOT IMPLEMENTED")
     return "m"
 
 
@@ -21,17 +27,35 @@ def getValueUnit(type):
 # -------------------------
 
 def getFlightById(flight_id):
+    """ Returns Flight by ID
+    @param flight_id: Flight ID
+    @type flight_id: int
+    @rtype: Flight or None
+    """
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_ID, flight_id)
     return flight
 
 
 def getFlightByNumber(flight_number):
+    """ Return Flight by specified flight number
+    @param flight_number: Flight number
+    @type: int
+    @return: Flight object
+    @rtype: Flight or None
+    """
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     return flight
 
 
 def saveNewFlight(flight):
+    """Save new Flight
+    @param flight: Flight object
+    @type flight: Flight
+    @return: True if flight saved.
+    @rtype: bool
+    """
     return dao.saveFlight(flight)
+
 
 def deleteFlightById(flight_id):
     return dao.deleteFlight(flight_id)
@@ -56,6 +80,13 @@ def getFlightList():
 
 
 def computeHash(number):
+    """ Computes hash for flight number
+    @param number: Flight nuumber
+    @type number: string
+    @return: Hash
+    @rtype: string
+    @raise TypeError: If number parameter is not string
+    """
     m = hashlib.md5()
     m.update(number)
     return m.hexdigest()
@@ -66,23 +97,34 @@ def computeHash(number):
 # -------------------------
 
 def saveNewEvent(flight, data, time_received):
+    # Datetime from received data
     dt = float(data['timestamp'])
 
+    # Parameters from received data in time of event
     parameters = data['parameters']
 
+    # Create new Event object
     event = Event(flight_id=flight.id, type=data['event'], time_created=datetime.fromtimestamp(dt))
+    # Save new Event to Database
     event.id = dao.saveEvent(event)
 
+    # Save parameters to Database
     for param in parameters:
         type = param['type']
 
+        # If parameter has specified different time use that
         if param.has_key("timestamp"):
             time_created = datetime.fromtimestamp(float(param['timestamp']))
         else:
             time_created = datetime.fromtimestamp(dt)
 
-        p = Parameter(type=type, time_received=datetime.fromtimestamp(time_received), time_created=time_created, flight_id=flight.id)
+        # Create new Parameter object
+        p = Parameter(type=type, time_received=datetime.fromtimestamp(time_received), time_created=time_created,
+                      flight_id=flight.id)
+        # Save new Parameter to Database
         p.id = dao.saveParameter(p)
+
+        # Bind Parameter to Event
         dao.bindParameterToEvent(p.id, event.id)
 
         inputValues = param['values']
@@ -142,7 +184,7 @@ def getParametersWithValuesByFlight(flight_id):
 
 def getEventsByFlight(flight_id):
     events = dao.getEventsByFlight(flight_id)
-    #for e in events:
+    # for e in events:
     #    fillParametersDictionary(e)
     #    for p in e.parameters:
     #        fillValuesDictionary(p)
@@ -181,7 +223,7 @@ def getValueObject(v):
 def getFlightLastPosition(flight_number):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameter = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
-    #if parameter is not None:
+    # if parameter is not None:
     #    fillValuesDictionary(parameter)
     return parameter
 
@@ -189,7 +231,7 @@ def getFlightLastPosition(flight_number):
 def getFlightFirstPosition(flight_number):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameter = dao.getParameterFirstByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
-    #if parameter is not None:
+    # if parameter is not None:
     #    fillValuesDictionary(parameter)
     return parameter
 
@@ -197,12 +239,17 @@ def getFlightFirstPosition(flight_number):
 def getFlightPath(flight_number):
     flight = dao.getFlightByKey(Flight.FlightEntry.KEY_NUMBER, flight_number)
     parameters = dao.getParametersByKeyByFlight(Parameter.ParameterEntry.KEY_TYPE, "position", flight.id)
-    #for p in parameters:
+    # for p in parameters:
     #    fillValuesDictionary(p)
     return parameters
 
 
 def fillValuesDictionary(p):
+    """
+    @deprecated: Used with SQLAlchemy
+    @param p:
+    @return:
+    """
     if p is None:
         raise TypeError("Parameter is Null")
     valuesDictTemp = {}
@@ -211,7 +258,13 @@ def fillValuesDictionary(p):
 
     return valuesDictTemp
 
+
 def fillParametersDictionary(e):
+    """
+    @deprecated: Used with SQLAlchemy
+    @param e:
+    @return:
+    """
     if e is None:
         raise TypeError("Parameter is Null")
     e.parametersDict = {}
@@ -244,7 +297,7 @@ def getChartData(flight_id, value):
     @param value:
     @return: Data or None
     """
-    data = dao.getParametersByKeyByFlight('value_1.name',value,flight_id) or None
+    data = dao.getParametersByKeyByFlight('value_1.name', value, flight_id) or None
     result = []
     for p in data:
         x = {}
@@ -254,5 +307,3 @@ def getChartData(flight_id, value):
         x["val"] = p.values[value]
         result.append(x)
     return result
-
-

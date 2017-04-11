@@ -17,6 +17,7 @@ LOG.debug("Starting flask app main.py")
 @app.route('/map')
 def balloonDashboard():
 
+    # Checks if flight number in URL, else use default number 42
     if request.args.has_key("flight"):
         num = request.args.get("flight")
         num = num.encode('ascii', 'ignore')
@@ -35,18 +36,22 @@ def balloonDashboard():
 
     data = {}
 
+    # Get balloon location
     balloonLocation = Controller.getBalloonLocation(flight_number)
     if balloonLocation:
         data['location'] = balloonLocation
 
+    # Get balloon flight path
     balloonPath = Controller.getBalloonPath(flight_number)
     if balloonPath:
         data['path'] = balloonPath
 
+    # Get balloon burst location
     balloonBurst = Controller.getBalloonBurst(flight_number)
     if balloonBurst:
         data['burst'] = balloonBurst
 
+    # Get balloon starting location
     balloonStart = Controller.getBalloonStart(flight_number)
     if balloonStart:
         data['start'] = balloonStart
@@ -55,6 +60,7 @@ def balloonDashboard():
             data['landingPredicted'] = predictionResult
             data['predictedPath'] = predictionPathResult
 
+    # Get list of all flights for drop-down selection
     flightList = Controller.getFlightList()
     if flightList:
         data['flightList'] = flightList
@@ -74,6 +80,9 @@ def flight_administration():
 
 @app.route('/admin/flight/add', methods=['POST'])
 def xadd_flight():
+    """
+    @deprecated: Using REST API in newer version
+    """
     if not request.method == 'POST':
         abort(405)
 
@@ -88,6 +97,9 @@ def xadd_flight():
 
 @app.route('/admin/flight/<int:flight_id>/delete')
 def xdelete_flight(flight_id):
+    """
+    @deprecated: Never really used
+    """
     abort(501)
 
 

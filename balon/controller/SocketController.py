@@ -52,11 +52,19 @@ class SocketController(IBalloonSubject):
 
 @socketio.on('my_event', namespace='/socket/')
 def sendMessage():
+    """
+    @deprecated: For testing only
+    @return:
+    """
     emit('message', {'data': 'my data'})
 
 
 @socketio.on('connect', namespace='/socket/')
 def test_connect():
+    """
+    @deprecated: For testing only
+    @return:
+    """
     LOG.info("Connected.")
     emit('message', {'data': 'Connected to Socket'})
     LOG.debug("Message sent.")
@@ -64,6 +72,9 @@ def test_connect():
 
 @socketio.on('connect', namespace='/map')
 def balloonUpdate():
+    """
+    WebSocket connection init
+    """
     LOG.info("Client connected")
     emit('message', {'data': '[Server]: You have been connected.'})
     global thread
@@ -71,6 +82,9 @@ def balloonUpdate():
 
 @socketio.on('join', namespace='/map')
 def socket_join(data):
+    """
+    WebSocket client joined room for specified flight
+    """
     LOG.debug(data["flight"])
     flightNumber = data["flight"]
     flight = Controller.getFlightByNumber(flightNumber)

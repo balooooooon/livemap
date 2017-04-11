@@ -15,6 +15,11 @@ import datetime
 # -------------------------
 
 def getBalloonLocation(flight_number):
+    """ Returns dictionary with current Balloon location, ready to send to webpage
+    @param flight_number: Flight number
+    @type flight_number: int
+    @return: Dictionary with balloon location
+    """
     position = None
 
     # flight = service.getFlightByNumber(flight_number)
@@ -36,6 +41,11 @@ def getBalloonLocation(flight_number):
 
 
 def getBalloonStart(flight_number):
+    """ Returns dictionary with starting Balloon location, ready to send to webpage
+    @param flight_number: Flight number
+    @type flight_number: int
+    @return: Dictionary with balloon starting location
+    """
     position = None
 
     # flight = service.getFlightByNumber(flight_number)
@@ -57,6 +67,11 @@ def getBalloonStart(flight_number):
 
 
 def getBalloonBurst(flight_number):
+    """ Returns dictionary with Balloon location of burst, ready to send to webpage
+    @param flight_number: Flight number
+    @type flight_number: int
+    @return: Dictionary with balloon burst location
+    """
     position = None
 
     flight = service.getFlightByNumber(flight_number)
@@ -81,7 +96,11 @@ def getBalloonBurst(flight_number):
 
 
 def getBalloonPath(flight_number):
-
+    """ Returns dictionary with balloon flight path, ready to send to webpage
+    @param flight_number: Flight number
+    @type flight_number: int
+    @return: Dictionary with balloon path
+    """
     # flight = service.getFlightByNumber(flight_number)
     parameters = service.getFlightPath(flight_number)
 
@@ -112,23 +131,28 @@ def getBalloonPath(flight_number):
 # -------------------------
 
 def authenticate(flight_number, auth_hash):
+    """ Authorize connection, when new flight data received
+    @param flight_number:
+    @param auth_hash:
+    @return:
+    """
     # TODO
+    LOG.critical("Authenticating Not Implemented")
     if app.config["APP_AUTHENTICATE_FLIGHT"]:
-        LOG.critical("Authenticating Not Implemented")
         return False
     else:
         return True
 
 
 def saveNewParameters(flight_number, data):
-    flight = service.getFlightByNumber(flight_number)
     # Get modified Flight object from DB
+    flight = service.getFlightByNumber(flight_number)
 
-    time_received = int(time.time())
     # Get time of message receive
+    time_received = int(time.time())
 
-    service.saveParameterWithValues(flight, data, time_received)
     # Save new parameters
+    service.saveParameterWithValues(flight, data, time_received)
 
     return True
 
@@ -145,12 +169,14 @@ def getEventsAllByFlight(flight_id):
     return events
 
 def isValidEvent(event,ev):
-    """
-    Check if event is valid
-    :param event: String
-    :return: True/False
+    """ Check if event is valid
+    @param event: Event type
+    @type event: string
+    @return: True if event valid
+    @rtype: bool
     """
     # TODO
+    LOG.critical("isValidEvent NOT IMPLEMENTED")
     return True
 
 
@@ -170,17 +196,17 @@ def saveNewEvent(flight_number,event,data):
 def saveNewFlight(number, datetime):
     LOG.info("Saving new Flight")
 
-    datetime = parseHTMLDateTimeToDateTime(datetime)
     # Parse DateTime formated by HTML input tag to Python datetime object
+    datetime = parseHTMLDateTimeToDateTime(datetime)
 
-    hash = service.computeHash(number)
     # Compute hash for Flight
+    hash = service.computeHash(number)
 
-    flight = Flight(number=int(number), hash=hash, start_date=datetime)
     # Create new Flight object
+    flight = Flight(number=int(number), hash=hash, start_date=datetime)
 
-    return service.saveNewFlight(flight)
     # Save new Flight object
+    return service.saveNewFlight(flight)
 
 def deleteFlight(flight_id):
     res = service.deleteFlightById(flight_id)
@@ -197,9 +223,8 @@ def getFlightAll():
 
 
 def getFlightList():
-    """
-    Returns list of all flights
-    @return: array - list of flights
+    """ Returns list of all flights
+    @return: array of flights
     """
     flightList = service.getFlightList()
     return flightList
@@ -210,8 +235,9 @@ def parseHTMLDateTimeToDateTime(date):
     Thanks to:
         http://stackoverflow.com/questions/9637838/convert-string-date-to-timestamp-in-python
 
-    :param date: HTML-formatted datetime
-    :return: Python datetime object
+    @param date: HTML-formatted datetime
+    @return: Python datetime object
+    @rtype: datetime
     """
     from datetime import datetime as dt
     HTML_DATETIME_FORMAT = "%Y-%m-%dT%H:%M"
@@ -226,10 +252,9 @@ def parseHTMLDateTimeToTimestamp(date):
 
 
 def flightExists(flight_number):
-    """
-    Checks if Flight with requested Flgiht Number exists in Database
+    """ Checks if Flight with requested Flgiht Number exists in Database
     @param flight_number: Flight Number
-    @return: boolean
+    @rtype: boolean
     """
     flight = service.getFlightByNumber(flight_number)
     if flight is Flight:

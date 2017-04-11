@@ -6,7 +6,9 @@ def connect_db(app):
     """
     Initializes database connection
     @param app: Flask application object
-    @return: MySQLdb.Connection
+    @type app: Flask
+    @return: MySQL Connection object
+    @rtype: MySQLdb.Connection
     """
     LOG.info("Connecting to database: %s@%s", app.config["MYSQL_DATABASE_DB"], app.config["MYSQL_DATABASE_HOST"])
     try:
