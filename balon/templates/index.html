@@ -27,9 +27,10 @@
     
     <script>
 
-    var balloonData = JSON.parse('{{balloon_data|tojson}}');
+    var balloonData = {{balloon_data|tojson}};
     console.log("Debug Values:");
     console.log(balloonData);
+
 
     // http://stackoverflow.com/a/31003742
     var params = window.location.search.substring(1).split("&").map(v => v.split("=")).reduce((map, [key, value]) => map.set(key, decodeURIComponent(value)), new Map());
@@ -194,6 +195,8 @@
             case "balloonPath":
               console.log("Path: ", message.data.type);
               handlePathUpdate(message);
+              lastPosition = message.data.points[message.data.points.length-1];
+              updateParameterPosition(lastPosition);
               break;
             case "balloonTelemetry":
               console.log("Telemetry");
@@ -201,6 +204,11 @@
               break;
           }
       });
+
+
+      if ( "location" in balloonData ) {
+        updateParameterPosition(balloonData.location.point);
+      }
     })
 
     </script>
@@ -231,10 +239,10 @@
 
     <div class="telemetry-card mdl-card mdl-shadow--2dp">
       <div class="mdl-card__title">
-        <h2>FIIT Sonda</h2>
+        <h2 id="telemetry-balloon-name">FIIT Sonda</h2>
       </div>
       <div class="mdl-card__title">
-        <h2 class="mdl-card__title-text">Status: <b style="margin: 0 5px"> N/A</b></h2>
+        <h2 class="mdl-card__title-text">Status: <b style="margin: 0 5px"><span id="telemetry-balloon-status">N/A</span></b></h2>
       </div>
     </div>
 
@@ -243,10 +251,10 @@
         <h2 class="mdl-card__title-text">Aktuálna pozícia:</h2>
       </div>
       <div class="md1-card__supporting-text">
-        <p class="telemetry-parameter position">18.4323 W, 40.1233 N</p>
+        <p class="telemetry-parameter position">- W, - N</p>
       </div>
       <div class="mdl-card__actions mdl-card--border">
-        <p class="telemetry-parameter position time">20.10.2016 14:54:23</p>
+        <p class="telemetry-parameter position time"></p>
       </div>
     </div>
 
@@ -255,10 +263,18 @@
         <h2 class="mdl-card__title-text">Výška:</h2>
       </div>
       <div class="md1-card__supporting-text">
-        <p class="telemetry-parameter altitude">0 m</p>
+        {% if balloon_data.telemetry and balloon_data.telemetry.data.parameters.altitude %}
+          <p class="telemetry-parameter altitude">{{ balloon_data.telemetry.data.parameters.altitude.value }} m</p>
+        {% else %}
+          <p class="telemetry-parameter altitude">- m</p>
+        {% endif %}
       </div>
       <div class="mdl-card__actions mdl-card--border">
-        <p class="telemetry-parameter altitude time">20.10.2016 14:54:23</p>
+        {% if balloon_data.telemetry and balloon_data.telemetry.data.parameters.altitude %}
+          <p class="telemetry-parameter altitude time">{{ balloon_data.telemetry.data.parameters.altitude.time | from_timestamp }}</p>
+        {% else %}
+          <p class="telemetry-parameter altitude time"></p>
+        {% endif %}
       </div>
     </div>
 
@@ -267,10 +283,22 @@
         <h2 class="mdl-card__title-text">Teplota:</h2>
       </div>
       <div class="md1-card__supporting-text">
-        <p class="telemetry-parameter temperature">0 °C</p>
+        {% if balloon_data.telemetry and balloon_data.telemetry.data.parameters.temperature %}
+          <p class="telemetry-parameter temperature">{{ balloon_data.telemetry.data.parameters.temperature.value }} °C</p>
+        {% else %}
+          <p class="telemetry-parameter temperature">- °C</p>
+        {% endif %}
       </div>
       <div class="mdl-card__actions mdl-card--border">
-        <p class="telemetry-parameter temperature time">20.10.2016 14:54:23</p>
+        {% if balloon_data.telemetry and balloon_data.telemetry.data.parameters.temperature %}
+          <p class="telemetry-parameter temperature time">
+            <script type="text/javascript">
+              document.write(formatDateTimeUTC({{ balloon_data.telemetry.data.parameters.temperature.time}}));
+            </script>
+            </p>
+        {% else %}
+          <p class="telemetry-parameter temperature time"></p>
+        {% endif %}
       </div>
     </div>
 
