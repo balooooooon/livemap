@@ -8,20 +8,21 @@ function verifyCoords(lat,lng) {
 
 function getReadableCoords(lat,lng) {
   var x,y;
+  const DECIMAL = 5;
   if( lat > 0 ) {
-    x = lat + " N";
+    x = lat.toFixed(DECIMAL) + " N";
   } else if( lat < 0 ) {
-    x = lat + " S";
+    x = lat.toFixed(DECIMAL) + " S";
   } else {
-    x = lat;
+    x = lat.toFixed(DECIMAL);
   }
 
   if( lng > 0 ) {
-    y = lng + " E";
+    y = lng.toFixed(DECIMAL) + " E";
   } else if( lng < 0 ) {
-    y = lng + " W";
+    y = lng.toFixed(DECIMAL) + " W";
   } else {
-    y = lng;
+    y = lng.toFixed(DECIMAL);
   }
 
   return x + ", " + y; 
@@ -37,7 +38,21 @@ function formatDateTime(timestamp) {
   var stringDateTime;
   stringDateTime = leadingZero(d.getDate()) + "." + leadingZero((d.getMonth()+1)) + "." + d.getFullYear() + " " + 
                   leadingZero(d.getHours()) + ":" + leadingZero(d.getMinutes()) + ":" + leadingZero(d.getSeconds());
-  return stringDateTime;
+
+  return stringDateTime + " " + formatTimeZone(d);
+}
+
+function formatDateTimeUTC(timestamp) {
+  var d = new Date(timestamp*1000);
+
+  var stringDateTime;
+  stringDateTime = leadingZero(d.getUTCDate()) + "." + leadingZero((d.getUTCMonth()+1)) + "." + d.getUTCFullYear() + " " + 
+                  leadingZero(d.getUTCHours()) + ":" + leadingZero(d.getUTCMinutes()) + ":" + leadingZero(d.getUTCSeconds());
+  return stringDateTime + " GMT";
+}
+
+function formatTimeZone(date) {
+  return date.toTimeString().split(" ")[1];
 }
 
 function setMarkerPosition(position,marker,positionData,textData) {

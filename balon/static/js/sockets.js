@@ -11,12 +11,18 @@ function updateTelemetryParameter(type,value,time) {
 
 function updateParameterPosition(position) {
   console.log(" --> updateParameterPosition()");
-  
+  console.log(position);
+
   var timestamp = position.time;
 
   var coords = getReadableCoords(position.lat,position.lng);
   $(".telemetry-parameter.position").not(".time").html(coords);
   $(".telemetry-parameter.position.time").html(formatDateTime(timestamp));
+
+  if ( "alt" in position ) {
+    updateTelemetryParameter("altitude",position.alt,position.time);
+  }
+  console.log(" --> updateParameterPosition()");
 }
 
 function getUnits(type) {
@@ -115,7 +121,7 @@ function updatePath(message) {
   console.log("Last point: ", lastPoint);
 
   setMarkerPosition(balloonPosition,balloonMarker,lastPoint,null);
-  updateParameterPosition(lastPoint);
+  // updateParameterPosition(lastPoint);
 
   console.log(" <-- updatePath()");
 }

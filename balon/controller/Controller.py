@@ -25,11 +25,12 @@ def getBalloonLocation(flight_number):
     # flight = service.getFlightByNumber(flight_number)
     parameter = service.getFlightLastPosition(flight_number)
 
-    if parameter is not None:        
+    if parameter is not None:
         position = {
             'type': "current",
             'point': {
-                'time': parameter.time_received,
+                # 'time': parameter.time_received,
+                'time': time.mktime(parameter.time_received.timetuple()),
                 'lat': parameter.values["lat"].value,
                 'lng': parameter.values["lng"].value
             }
@@ -50,7 +51,7 @@ def getBalloonStart(flight_number):
 
     # flight = service.getFlightByNumber(flight_number)
     parameter = service.getFlightFirstPosition(flight_number)
-    
+
     if parameter is not None:
         position = {
             'type': "start",
@@ -126,6 +127,33 @@ def getBalloonPath(flight_number):
     return path
 
 
+def getCurrentTelemetry(flight_id):
+    parameterList = service.getLastTelemetry(flight_id)
+
+    if parameterList is not None:
+        data = {
+            "type": "telemetry",
+            "data": {
+                "parameters": {
+                    "altitude" : {
+                        "name": "altitude",
+                        "value": parameterList["position"].values["alt"].value,
+                        "time": time.mktime(parameterList["position"].time_created.timetuple())
+                    },
+                    "temperature": {
+                        "name": "temperature",
+                        "value": parameterList["temperature"].values["out"].value,
+                        "time": time.mktime(parameterList["position"].time_created.timetuple())
+                    }
+                }
+            }
+        }
+
+        return data
+    else:
+        return None
+
+
 # -------------------------
 #      API
 # -------------------------
@@ -180,17 +208,17 @@ def isValidEvent(event,ev):
     return True
 
 
-def saveNewEvent(flight_number,event,data):
+def saveNewEvent(flight_number, event, data):
     LOG.info("Saving new Event")
 
-    if not isValidEvent(data['event'],event):
+    if not isValidEvent(data['event'], event):
         return False
 
     flight = service.getFlightByNumber(flight_number)
 
     time_received = int(time.time())
 
-    return service.saveNewEvent(flight,data,time_received)
+    return service.saveNewEvent(flight, data, time_received)
 
 
 def saveNewFlight(number, datetime):
@@ -262,9 +290,10 @@ def flightExists(flight_number):
     else:
         return False
 
+
 def getFlightByNumber(flight_number):
     flight = service.getFlightByNumber(flight_number)
-    if isinstance(flight,Flight):
+    if isinstance(flight, Flight):
         return flight
     else:
         return None
@@ -277,5 +306,5 @@ def getChartTypes(flight_id):
 
 
 def getChartData(flight_id, value):
-    chartData = service.getChartData(flight_id,value)
+    chartData = service.getChartData(flight_id, value)
     return chartData
