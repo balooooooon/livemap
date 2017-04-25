@@ -5,6 +5,10 @@
 	<title>Flight Detail</title>
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/flights.css') }}">
 
+    {% if prod %}
+      {% include "template_google_analytics.html" %}
+    {% endif %}
+
 	<!-- Probably download jQuery to static -->
 	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 	<script src="//code.jquery.com/jquery-1.12.4.js"></script>

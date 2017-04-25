@@ -25,6 +25,10 @@
     <script type="text/javascript" src="{{ url_for('static',filename='js/mapHelper.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static',filename='js/sockets.js') }}"></script>
     
+    {% if prod %}
+      {% include "template_google_analytics.html" %}
+    {% endif %}
+
     <script>
 
     var balloonData = {{balloon_data|tojson}};

@@ -9,6 +9,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config(object):
     DEBUG = False
     TESTING = False
+    REMOTE = False
     CSRF_ENABLED = True
     SECRET_KEY = 'this-really-needs-to-be-changed'
     
@@ -50,6 +51,7 @@ class Config(object):
 class DevelopConfig(Config):
     DEBUG = True
     TESTING = False
+    REMOTE = True
     CSRF_ENABLED = True
     SECRET_KEY = 'this-really-needs-to-be-changed'
 
@@ -83,6 +85,8 @@ class DevelopConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
+    REMOTE = True
+    PRODUCTION = True
     CSRF_ENABLED = True
     SECRET_KEY = 'this-really-needs-to-be-changed'
 

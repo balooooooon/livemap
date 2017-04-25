@@ -148,3 +148,9 @@ def jinja2_filter_datetime(timestamp, format=None):
         return date.strftime(format)
     else:
         return date.strftime(DEFAULT_FORMAT)
+
+@app.context_processor
+def inject_globals():
+    return dict(
+        prod = app.config['REMOTE']
+    )

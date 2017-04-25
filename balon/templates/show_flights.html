@@ -8,6 +8,10 @@
 	<script type="text/javascript" src="{{ url_for('static',filename='js/mapHelper.js') }}"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 
+    {% if prod %}
+      {% include "template_google_analytics.html" %}
+    {% endif %}
+
 	<!-- DataTables -->
 	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.css">
 	<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
