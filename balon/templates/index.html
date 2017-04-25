@@ -78,6 +78,11 @@
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 48.847665, lng: 19.518096},
           zoom: 8,
+           mapTypeControl: true,
+          mapTypeControlOptions: {
+              style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+              position: google.maps.ControlPosition.LEFT_BOTTOM
+          },
           zoomControl: true,
           zoomControlOptions: {
             position: google.maps.ControlPosition.LEFT_BOTTOM
@@ -85,7 +90,7 @@
           streetViewControl: false,
           scaleControl: false,
           scaleControlOptions: {
-            position: google.maps.ControlPosition.BOTTOM_LEFT
+            position: google.maps.ControlPosition.LEFT_BOTTOM
           }
         });
 
@@ -220,12 +225,21 @@
   </head>
   <body>
   <div id="mapWrapper">
-  	<div id="map"><!-- Here comes the map --></div>
+    <div id="map"><!-- Here comes the map --></div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCty_vzd_RYvE-x6_UdRx8Zl8owLlWh3ng&callback=initMap"
     async defer></script>
   </div>
+  <div id="leftSidePanelWrapper">
+    <div class="telemetry-bar-altitude mdl-shadow--2dp">
+      <div class="telemetry-bar-container">
+        <div class="progress" data-maxAlt="40000">
+          <div class="progress-bar bar-ground" style="height: 6%"></div>
+          <div class="progress-bar bar-altitude" style="height: 50%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="sidePanelWrapper">
-
     <div class="telemetry-card-flightPicker telemetry-card  mdl-card mdl-shadow--2dp ">
       <div class="md1-card__supporting-text">
       <label style="font-size:24px">Let:</label>
@@ -306,11 +320,11 @@
       </div>
     </div>
 
-  	<div class="telemetry-card mdl-card mdl-shadow--2dp" style="display:none">
-  		<div class="mdl-card__title">
+    <div class="telemetry-card mdl-card mdl-shadow--2dp" style="display:none">
+      <div class="mdl-card__title">
         <h4>Facebook Feed</h4>
       </div>
-  	</div>
+    </div>
   </div>
     
   </body>

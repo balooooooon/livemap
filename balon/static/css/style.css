@@ -17,6 +17,58 @@ html, body {
 
 }
 
+#leftSidePanelWrapper {
+	float: left;
+    height: 85%;
+    padding: 1% 1%;
+	font-family: 'Roboto', sans-serif !important;
+	position: relative;
+	display: flex;
+}
+
+.telemetry-bar-altitude {
+	height: 100%;
+    background-color: white;
+    border-radius: 2px;
+    display: flex;
+}
+
+.telemetry-bar-container {
+    padding: 15px;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
+}
+
+.progress {
+    height: 100%;
+    width: 30px;
+    background-color: #cacaca;
+    display: flex;
+    flex-direction: column-reverse;
+    /* justify-content: flex-start; */
+    position: relative;
+    background: linear-gradient(#2e3b82, rgb(89, 181, 255));
+}
+
+.progress-bar {
+    width: 100%;
+    position: absolute;
+}
+
+.bar-ground {
+	background-color: saddlebrown;
+	z-index: 1;
+	border-top: #009c00 solid 15px;
+}
+
+
+.bar-altitude {
+    background-color: transparent;
+    border-top: black 3px solid;
+	z-index: 0;
+}
+
 #sidePanelWrapper {
 	float: right;
     width: 18%;
