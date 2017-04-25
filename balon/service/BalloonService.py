@@ -307,3 +307,21 @@ def getChartData(flight_id, value):
         x["val"] = p.values[value]
         result.append(x)
     return result
+
+
+def getLastTelemetry(flight_id):
+    types = getChartTypes(flight_id)
+
+    telemetry = {}
+
+    if types is not None:
+        for p in types:
+            res = dao.getParameterLastByFlight(Parameter.ParameterEntry.KEY_TYPE, p["type"], flight_id)
+            telemetry[p["type"]] = res
+
+        return telemetry
+
+    else:
+        return None
+    
+

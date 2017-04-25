@@ -36,7 +36,8 @@ def balloonDashboard():
 
     data = {}
 
-    # Get balloon location
+    flight = Controller.getFlightByNumber(flight_number);
+
     balloonLocation = Controller.getBalloonLocation(flight_number)
     if balloonLocation:
         data['location'] = balloonLocation
@@ -65,7 +66,12 @@ def balloonDashboard():
     if flightList:
         data['flightList'] = flightList
 
-    # balloonTelemetry = getActualTelemetry()
+    # balloonLanding = getBalloonLanding()
+
+    balloonTelemetry = Controller.getCurrentTelemetry(flight.id)
+    if balloonTelemetry:
+        LOG.debug(balloonTelemetry)
+        data['telemetry'] = balloonTelemetry
 
     LOG.debug("Sending data: ", data)
 
